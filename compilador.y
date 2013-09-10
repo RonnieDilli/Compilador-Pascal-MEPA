@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "compilador.h"
+#include "tabelasimb.h"
 
 int num_vars;
 
@@ -85,6 +86,8 @@ comandos:
 main (int argc, char** argv) {
    FILE* fp;
    extern FILE* yyin;
+   
+   TabelaSimb *tabelaSimbDin;
 
    if (argc<2 || argc>2) {
          printf("usage compilador <arq>a %d\n", argc);
@@ -97,13 +100,21 @@ main (int argc, char** argv) {
       return(-1);
    }
 
+/* -------------------------------------------------------------------
+ *  Inicia a Tabela de Símbolos Dinamica (pilha)
+ * ------------------------------------------------------------------- */
+
+   if (!criaTabela(tabelaSimbDin)) {
+     printf("#DEBUG: Tabela de simbolos Dinamica criada!\n\n");
+   }
+
 
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
 
    yyin=fp;
-   yyparse();
+   yyparse(); 
 
    return 0;
 }
