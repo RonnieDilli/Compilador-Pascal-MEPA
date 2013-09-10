@@ -17,6 +17,7 @@
 /compilador
 /compilador.tab.h
 /compilador.tab.c
+/compilador.output
 /lex.yy.c
 
 # Compiled source #

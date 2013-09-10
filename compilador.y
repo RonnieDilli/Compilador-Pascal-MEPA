@@ -1,6 +1,6 @@
 
-// Testar se funciona corretamente o empilhamento de parâmetros
-// passados por valor ou por referência.
+// Testar se funciona corretamente o empilhamento de parÃ¢metros
+// passados por valor ou por referÃªncia.
 
 
 %{
@@ -65,8 +65,8 @@ tipo        : IDENT
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT 
-              { /* insere última vars na tabela de símbolos */ }
-            | IDENT { /* insere vars na tabela de símbolos */}
+              { /* insere Ãºltima vars na tabela de sÃ­mbolos */ }
+            | IDENT { /* insere vars na tabela de sÃ­mbolos */}
 ;
 
 lista_idents: lista_idents VIRGULA IDENT  
@@ -99,7 +99,7 @@ main (int argc, char** argv) {
 
 
 /* -------------------------------------------------------------------
- *  Inicia a Tabela de Símbolos
+ *  Inicia a Tabela de SÃ­mbolos
  * ------------------------------------------------------------------- */
 
    yyin=fp;

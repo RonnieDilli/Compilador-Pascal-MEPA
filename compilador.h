@@ -7,7 +7,7 @@
  *
  * -------------------------------------------------------------------
  *
- * Tipos, protÛtipos e vai·veis globais do compilador
+ * Tipos, prot√≥tipos e vai√°veis globais do compilador
  *
  * ------------------------------------------------------------------- */
 
@@ -23,7 +23,7 @@ typedef enum simbolos {
 
 
 /* -------------------------------------------------------------------
- * vari·veis globais
+ * vari√°veis globais
  * ------------------------------------------------------------------- */
 
 extern simbolos simbolo, relacao;
@@ -37,4 +37,8 @@ simbolos simbolo, relacao;
 char token[TAM_TOKEN];
 
 
+/* -------------------------------------------------------------------
+ * funcoes auxiliares
+ * ------------------------------------------------------------------- */
 
+void yyerror (char *s); /*  Arruma erro de compilacao do ProjetoBase  */

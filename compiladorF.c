@@ -8,7 +8,7 @@
  *
  * -------------------------------------------------------------------
  *
- * Funções auxiliares ao compilador
+ * FunÃ§Ãµes auxiliares ao compilador
  *
  * ------------------------------------------------------------------- */
 
@@ -19,7 +19,7 @@
 
 
 /* -------------------------------------------------------------------
- *  variáveis globais
+ *  variÃ¡veis globais
  * ------------------------------------------------------------------- */
 
 FILE* fp=NULL;
@@ -39,4 +39,13 @@ void geraCodigo (char* rot, char* comando) {
 int imprimeErro ( char* erro ) {
   fprintf (stderr, "Erro na linha %d - %s\n", nl, erro);
   exit(-1);
+}
+
+
+/* -------------------------------------------------------------------
+ * funcoes auxiliares
+ * ------------------------------------------------------------------- */
+
+void yyerror (char *s) {  /*  Arruma erro de compilacao do ProjetoBase  */
+    fprintf (stderr, "%s\n", s);
 }

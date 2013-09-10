@@ -163,8 +163,8 @@
 #  DSVF
 #  Se topo da pilha == 0, entao desvia para rot,
 #                          senao segue
-#  ImplementaÁ„o complicada.
-#  - chama _dsvf com a pilha na seguinte situaÁao:
+#  Implementa√ß√£o complicada.
+#  - chama _dsvf com a pilha na seguinte situa√ßao:
 #      valor booleano (%ecx)
 #      endereco de retorno se topo=0 (%ebc)
 #      endereco de retorno se topo=1 (%eax)
@@ -190,7 +190,7 @@ _dsvf_falso:
    ret
    
 # -----------------------------------------------------------------
-#  DSVR - Desvia para rÛtulo
+#  DSVR - Desvia para r√≥tulo
 #
 # -----------------------------------------------------------------
 
@@ -267,16 +267,16 @@ _dsvf_falso:
       
 # -----------------------------------------------------------------
 #  DIVI
-# A divis„o no intel È esquisita. O comando divl n„o usa dois
-# operandos, mas sim um. A instruÁ„o assume que a divis„o È do par
-# %edx:%eax (64 # bits) pelo par‚metro. O quociente vai em %eax e o
+# A divis√£o no intel √© esquisita. O comando divl n√£o usa dois
+# operandos, mas sim um. A instru√ß√£o assume que a divis√£o √© do par
+# %edx:%eax (64 # bits) pelo par√¢metro. O quociente vai em %eax e o
 # resto vai # para %edx.
 # -----------------------------------------------------------------
 
 .macro DIVI
    popl %edi     # divisor
    popl %eax     # dividendo
-   movl $0, %edx # n„o pode esquecer de zerar %edx quando n„o o usar.
+   movl $0, %edx # n√£o pode esquecer de zerar %edx quando n√£o o usar.
    idiv %edi     #  faz %edx:%eax / %edi
    push %eax     # empilha o resultado
 .endm
@@ -455,15 +455,15 @@ _cmge_true:
 #
 # Alterado para: CHPR p,m { M[s+1]:=m; M[s+2]:=i+1; s:= s+2;  i:=p}
 # 
-# CHPR - A implementaÁ„o de chamadas de procedimento È diferente da
-# proposta original do livro. O problema È como guardar o ER e depois
-# disso guardar k. … possÌvel fazer, porÈm fica muito complicado (atÈ
+# CHPR - A implementa√ß√£o de chamadas de procedimento √© diferente da
+# proposta original do livro. O problema √© como guardar o ER e depois
+# disso guardar k. √â poss√≠vel fazer, por√©m fica muito complicado (at√©
 # na volta do procedimento). Por isso, optei por fazer uma
-# implementaÁ„o diferente. Primeiro vai "k" e depois "ER". Isso
-# implica em alteraÁıes na implementaÁ„o de ENPR, RTPR e DSVR - mas
-# n„o no nÌvel de geraÁ„o de comandos. Os mesmos comandos MEPA
-# funcionam aqui igual ao que funcionariam na idÈia original (exceto
-# pela inverÁ„o de k e ER, evidentemente).
+# implementa√ß√£o diferente. Primeiro vai "k" e depois "ER". Isso
+# implica em altera√ß√µes na implementa√ß√£o de ENPR, RTPR e DSVR - mas
+# n√£o no n√≠vel de gera√ß√£o de comandos. Os mesmos comandos MEPA
+# funcionam aqui igual ao que funcionariam na id√©ia original (exceto
+# pela inver√ß√£o de k e ER, evidentemente).
 # -----------------------------------------------------------------
 
 .macro CHPR rot k
@@ -509,7 +509,7 @@ _cmge_true:
 
 
 # -----------------------------------------------------------------
-#  Macros para depuraÁ„o
+#  Macros para depura√ß√£o
 # -----------------------------------------------------------------
 
 # -----------------------------------------------------------------
