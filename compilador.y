@@ -21,7 +21,10 @@ char buf[255];
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
 %token NUMERO SOMA SUBTRACAO MULTIPLICACAO DIVISAO
 %token OR AND MAIOR_QUE MENOR_QUE
-%token IF THEN WHILE DO GOTO
+%token IF THEN ELSE WHILE DO GOTO
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 
 %%
 
@@ -81,36 +84,59 @@ lista_idents: lista_idents VIRGULA IDENT
 ;
 
 
-comando_composto: T_BEGIN comandos T_END 
+comando_composto: T_BEGIN comandos T_END
 ;
 
-comandos:     comandos PONTO_E_VIRGULA comando
-              | comando
+comandos    : comandos PONTO_E_VIRGULA comando
+            | comando
 ;
 
-comando:      NUMERO DOIS_PONTOS com_sem_rot
-              | com_sem_rot
+comando     : NUMERO DOIS_PONTOS com_sem_rot
+            | comando_composto
+            | com_sem_rot
+            | 
 ;
 
-com_sem_rot:  atrib                               { /* TODO: Acabar de escrever a regra */ }
+com_sem_rot : atrib                               { /* TODO: Acabar de escrever a regra */ }
+            | com_condic
+            | com_repetit
 ;
 
-atrib:        IDENT ATRIBUICAO expr_simples PONTO_E_VIRGULA          { /* TODO: Acabar de escrever a regra */ }
+atrib       : IDENT ATRIBUICAO expressao          { /* TODO: Confirmar regra */ }
 ;
 
-expr_simples:    expressao | expressao operando expressao   { /* TODO: Acabar de escrever a regra */ }
+com_condic  : IF expressao THEN comando %prec LOWER_THAN_ELSE
+            | IF expressao THEN comando ELSE comando
 ;
 
-expressao:    expressao SOMA T               { /* TODO: Acabar de escrever a regra */ }
-              | expressao OR T
-              | T
+com_repetit : WHILE expressao DO comando
 ;
 
-T:            NUMERO            { /* TODO: Acabar de escrever a regra */ }
+expressao   : expr_simples relacao expr_simples   { /* TODO: Acabar de escrever a regra */ }
+            | expr_simples
 ;
 
-operando:     '+' | '-'       { /* TODO: Acabar de escrever a regra */ }
+expr_simples: expr_simples SOMA termo
+            | expr_simples SUBTRACAO termo
+            | expr_simples OR termo
+            | termo
 ;
+
+termo       : fator MULTIPLICACAO fator
+            | fator DIVISAO fator
+            | fator AND fator
+            | fator
+;
+
+fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
+            | IDENT
+            | NUMERO
+;
+
+relacao     : MAIOR_QUE                           { /* TODO: Acabar de escrever a regra */ }
+            | MENOR_QUE
+;
+
 
 %%
 

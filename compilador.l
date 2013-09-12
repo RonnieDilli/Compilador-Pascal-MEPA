@@ -159,6 +159,12 @@ then { simbolo = simb_then;
   return THEN;
 }
 
+else { simbolo = simb_else;  
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME(" else              ");
+  return ELSE;
+}
+
 while { simbolo = simb_while;  
   strncpy (token, yytext, TAM_TOKEN);
   IMPRIME(" while             ");
