@@ -19,6 +19,7 @@
 /compilador.tab.c
 /compilador.output
 /lex.yy.c
+/MEPA
 
 # Compiled source #
 ###################

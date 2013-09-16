@@ -1,19 +1,37 @@
 
 /*  Estrutura de dados da Tabela de Simbolos  */
-typedef struct elemento TabelaSimb;
-typedef struct elemento {
-  int identificador, categoria, nivellexico, deslocamento, tipo;
-  TabelaSimb *anterior, *proximo;
-} elemento;
+#define MAX_TAB 100
+
+typedef enum CategoriaT {
+  VS, TEST
+} CategoriaT;
+
+typedef enum TipoT {
+  INT, BOOLEAN, CHAR, VOID, FUNCTION
+} TipoT;
+
+typedef struct ElementoT {
+  char id[255];
+  CategoriaT cat;
+  int nivellexico, deslocamento;
+  TipoT tipo;
+} ElementoT;
+
+typedef struct TabelaSimbT {
+  ElementoT elemento[MAX_TAB];
+  int num_elementos;
+} TabelaSimbT;
+
 
 /*  Estrutura com variaveis auxiliares  */
 
+int procuraElementoTab(TabelaSimbT *, char *);
 
-int criaTabela(TabelaSimb *);
+int imprimeElementosTab(TabelaSimbT *, char *);
 
-TabelaSimb * procuraElemento(int nl, char *);
+int insereElementosTab(TabelaSimbT *, int);
 
-TabelaSimb * insereElemento();
 
-int removeElemento(char *);
+// int criaTabela(TabelaSimb *);
+// int removeElemento(char *);
 

@@ -11,12 +11,13 @@
 #include "compilador.h"
 #include "tabelasimb.h"
 
-int num_vars;
+int num_vars, id1, id2;
 char buf[255];
+TabelaSimbT *tab, tabelaSimbDin;
 
 %}
 
-%token PROGRAM ABRE_PARENTESES FECHA_PARENTESES 
+%token PROGRAM ABRE_PARENTESES FECHA_PARENTESES
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
 %token NUMERO SOMA SUBTRACAO MULTIPLICACAO DIVISAO
@@ -28,28 +29,28 @@ char buf[255];
 
 %%
 
-programa    :{ 
-             geraCodigo (NULL, "INPP"); 
+programa    :{
+             geraCodigo (NULL, "INPP");
              }
-             PROGRAM IDENT 
+             PROGRAM IDENT
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
-             geraCodigo (NULL, "PARA"); 
+             geraCodigo (NULL, "PARA");
              }
 ;
 
-bloco       : 
+bloco       :
               parte_declara_vars
-              { 
+              {
               }
 
-              comando_composto 
+              comando_composto
               ;
 
 
 
 
-parte_declara_vars:  var 
+parte_declara_vars:  var
 ;
 
 
@@ -57,16 +58,17 @@ var         : { } VAR declara_vars
             |
 ;
 
-declara_vars: declara_vars declara_var 
-            | declara_var 
+declara_vars: declara_vars declara_var
+            | declara_var
 ;
 
-declara_var : { num_vars=0; } 
-              lista_id_var DOIS_PONTOS 
-              tipo 
+declara_var : { num_vars=0; }
+              lista_id_var DOIS_PONTOS
+              tipo
               {
                 sprintf(buf, "AMEN %d", num_vars);
                 geraCodigo (NULL, buf);  /* AMEM */
+                /* #TODO volta setando o tipo das num_vars variaveis na Tabela tab */
               }
               PONTO_E_VIRGULA
 ;
@@ -74,12 +76,12 @@ declara_var : { num_vars=0; }
 tipo        : IDENT
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT 
-              { num_vars=num_vars + 1; /* insere última vars na tabela de símbolos */ }
-            | IDENT { num_vars=num_vars + 1; /* insere vars na tabela de símbolos */}
+lista_id_var: lista_id_var VIRGULA IDENT
+              { num_vars=num_vars + 1; insereElementosTab(tab, 1); /* insere última vars na tabela de símbolos */ }
+            | IDENT { num_vars=num_vars + 1; insereElementosTab(tab, 1); /* insere vars na tabela de símbolos */}
 ;
 
-lista_idents: lista_idents VIRGULA IDENT 
+lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
@@ -94,7 +96,7 @@ comandos    : comandos PONTO_E_VIRGULA comando
 comando     : NUMERO DOIS_PONTOS com_sem_rot
             | comando_composto
             | com_sem_rot
-            | 
+            |
 ;
 
 com_sem_rot : atrib                               { /* TODO: Acabar de escrever a regra */ }
@@ -143,8 +145,6 @@ relacao     : MAIOR_QUE                           { /* TODO: Acabar de escrever 
 main (int argc, char** argv) {
    FILE* fp;
    extern FILE* yyin;
-   
-   TabelaSimb *tabelaSimbDin;
 
    if (argc<2 || argc>2) {
          printf("usage compilador <arq>a %d\n", argc);
@@ -161,9 +161,15 @@ main (int argc, char** argv) {
  *  Inicia a Tabela de Símbolos Dinamica (pilha)
  * ------------------------------------------------------------------- */
 
-   if (!criaTabela(tabelaSimbDin)) {
-     printf("#DEBUG: Tabela de simbolos Dinamica criada!\n\n");
-   }
+    tab = &tabelaSimbDin;
+    tab->num_elementos = 0;
+
+    strcpy(tab->elemento[4].id, "Oi passei pelo [main]!"); // #DEBUG
+    strcpy(tab->elemento[2].id, "Achei voce! [main]"); // #DEBUG
+    printf("#DEBUG: [main] tab->num_elementos = %d\n", tab->num_elementos);
+
+/*    insereElementosTab(tab, 10);*/
+
 /* -------------------------------------------------------------------
  *  Inicializa as variaveis de controle
  * ------------------------------------------------------------------- */
@@ -174,7 +180,11 @@ main (int argc, char** argv) {
  * ------------------------------------------------------------------- */
 
    yyin=fp;
-   yyparse(); 
+   yyparse();
+   
+   imprimeElementosTab(tab, "oi"); // DEBUG
+
+   id1 = procuraElementoTab(tab, "Achei voce! #SQN [main]"); // DEBUG
 
    return 0;
 }
