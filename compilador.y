@@ -79,9 +79,10 @@ tipo        : IDENT
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT
-              { num_vars=num_vars + 1; insereElementosTab(tab, 1); /* insere última vars na tabela de símbolos */ }
-            | IDENT { num_vars=num_vars + 1; insereElementosTab(tab, 1);     debug_print("[%s] token = %s\n", __func__, token);
- /* insere vars na tabela de símbolos */}
+              { num_vars=num_vars + 1; insereElementosTab(tab, 1);
+                      strcpy(tab->elemento[tab->num_elementos-1].id, token);  /* insere última vars na tabela de símbolos */ }
+            | IDENT { num_vars=num_vars + 1; insereElementosTab(tab, 1);
+                      strcpy(tab->elemento[tab->num_elementos-1].id, token);  /* insere vars na tabela de símbolos */}
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
@@ -167,8 +168,6 @@ main (int argc, char** argv) {
     tab = &tabelaSimbDin;
     tab->num_elementos = 0;
 
-    strcpy(tab->elemento[4].id, "Oi passei pelo [main]!"); // #DEBUG
-    strcpy(tab->elemento[2].id, "Achei voce! [main]"); // #DEBUG
     debug_print("[%s] tab->num_elementos = %d\n", __func__, tab->num_elementos);
 
 /*    insereElementosTab(tab, 10);*/
