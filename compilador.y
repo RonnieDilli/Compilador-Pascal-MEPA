@@ -15,6 +15,7 @@
 int num_vars, id1, id2;
 char buf[255];
 TabelaSimbT *tab, tabelaSimbDin;
+PilhaT pilha_e, pilha_t, pilha_f;
 
 %}
 
@@ -79,7 +80,8 @@ tipo        : IDENT
 
 lista_id_var: lista_id_var VIRGULA IDENT
               { num_vars=num_vars + 1; insereElementosTab(tab, 1); /* insere última vars na tabela de símbolos */ }
-            | IDENT { num_vars=num_vars + 1; insereElementosTab(tab, 1); /* insere vars na tabela de símbolos */}
+            | IDENT { num_vars=num_vars + 1; insereElementosTab(tab, 1);     debug_print("[%s] token = %s\n", __func__, token);
+ /* insere vars na tabela de símbolos */}
 ;
 
 lista_idents: lista_idents VIRGULA IDENT

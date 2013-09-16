@@ -1,6 +1,7 @@
 
 /*  Estrutura de dados da Tabela de Simbolos  */
 #define MAX_TAB 100
+#define MAX_ID  255
 
 typedef enum CategoriaT {
   VS, TEST
@@ -11,7 +12,7 @@ typedef enum TipoT {
 } TipoT;
 
 typedef struct ElementoT {
-  char id[255];
+  char id[MAX_ID];
   CategoriaT cat;
   int nivellexico, deslocamento;
   TipoT tipo;
