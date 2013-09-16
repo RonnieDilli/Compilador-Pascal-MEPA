@@ -13,6 +13,12 @@
 
 #define TAM_TOKEN 16
 
+#define DEBUG 1
+
+#define debug_print(fmt, ...) \
+  if (DEBUG) fprintf(stderr, "#DEBUG: "); \
+    if (DEBUG) do { fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+
 typedef enum simbolos { 
   simb_program, simb_var, simb_begin, simb_end, 
   simb_identificador, simb_numero,

@@ -10,6 +10,7 @@
 #include <string.h>
 #include "compilador.h"
 #include "tabelasimb.h"
+#include "pilha.h"
 
 int num_vars, id1, id2;
 char buf[255];
@@ -166,7 +167,7 @@ main (int argc, char** argv) {
 
     strcpy(tab->elemento[4].id, "Oi passei pelo [main]!"); // #DEBUG
     strcpy(tab->elemento[2].id, "Achei voce! [main]"); // #DEBUG
-    printf("#DEBUG: [main] tab->num_elementos = %d\n", tab->num_elementos);
+    debug_print("[%s] tab->num_elementos = %d\n", __func__, tab->num_elementos);
 
 /*    insereElementosTab(tab, 10);*/
 
