@@ -12,10 +12,10 @@
 #include "tabelasimb.h"
 #include "pilha.h"
 
-int num_vars, id1, id2;
+int num_vars, id1, id2, num, aux1;
 char buf[255];
 TabelaSimbT *tab, tabelaSimbDin;
-PilhaT pilha_e, pilha_t, pilha_f;
+PilhaT pilha_s, pilha_e, pilha_t, pilha_f;
 
 %}
 
@@ -136,7 +136,11 @@ termo       : fator MULTIPLICACAO fator
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
             | IDENT
-            | NUMERO
+            | NUMERO {  num = atoi(token);
+                        empilha(&pilha_s, &num); /* CRCT x */
+                        debug_print("[%s].linha=%d: num = %d\n", __func__, nl, num );
+                        aux1 = *(int *)(desempilha(&pilha_s));
+                        debug_print("[%s].linha=%d: aux1 = %d\n", __func__, nl, aux1 );}
 ;
 
 relacao     : MAIOR_QUE                           { /* TODO: Acabar de escrever a regra */ }
@@ -186,7 +190,7 @@ main (int argc, char** argv) {
    
    imprimeElementosTab(tab, "oi"); // DEBUG
 
-   id1 = procuraElementoTab(tab, "Achei voce! #SQN [main]"); // DEBUG
+   id1 = procuraElementoTab(tab, "b"); // DEBUG
 
    return 0;
 }

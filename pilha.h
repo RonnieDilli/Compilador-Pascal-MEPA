@@ -4,7 +4,7 @@
 
 typedef struct PilhaT {
   void *elemento[PILHA_TAM];
-  int num_elementos;
+  int topo;
 } PilhaT;
 
 int inicializaPilha(PilhaT *);
