@@ -16,7 +16,7 @@
 #define DEBUG 1
 
 #define debug_print(fmt, ...) \
-  if (DEBUG) fprintf(stderr, "#DEBUG: "); \
+  if (DEBUG) fprintf(stderr, "#DEBUG [%s] ", __func__); \
     if (DEBUG) do { fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
 typedef enum simbolos { 

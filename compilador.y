@@ -138,9 +138,9 @@ fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
             | IDENT
             | NUMERO {  num = atoi(token);
                         empilha(&pilha_s, &num); /* CRCT x */
-                        debug_print("[%s].linha=%d: num = %d\n", __func__, nl, num );
+                        debug_print(".linha=%d: num = %d\n", nl, num );
                         aux1 = *(int *)(desempilha(&pilha_s));
-                        debug_print("[%s].linha=%d: aux1 = %d\n", __func__, nl, aux1 );}
+                        debug_print(".linha=%d: aux1 = %d\n", nl, aux1 ); }
 ;
 
 relacao     : MAIOR_QUE                           { /* TODO: Acabar de escrever a regra */ }
@@ -172,9 +172,9 @@ main (int argc, char** argv) {
     tab = &tabelaSimbDin;
     tab->num_elementos = 0;
 
-    debug_print("[%s] tab->num_elementos = %d\n", __func__, tab->num_elementos);
+    debug_print("tab->num_elementos = %d\n", tab->num_elementos);
 
-/*    insereElementosTab(tab, 10);*/
+    // insereElementosTab(tab, 10); //DEBUG - Teste
 
 /* -------------------------------------------------------------------
  *  Inicializa as variaveis de controle

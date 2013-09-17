@@ -15,7 +15,7 @@ int inicializaPilha(PilhaT *pilha) {
 
 int empilha(PilhaT *pilha, void *novo_elemento) {
   if (pilha == NULL) {
-    debug_print("[%s] pilha == NULL\n", __func__);
+    debug_print("pilha == NULL\n", "");
     return -1;  // TODO tratar erro
   }
   else if (pilha->topo > PILHA_TAM) {
@@ -23,6 +23,7 @@ int empilha(PilhaT *pilha, void *novo_elemento) {
     exit (-1);
   }
   else {
+    debug_print("+1\n", "");
     pilha->elemento[pilha->topo] = novo_elemento;
     pilha->topo++;
     return 0;
@@ -31,7 +32,7 @@ int empilha(PilhaT *pilha, void *novo_elemento) {
 
 void * desempilha(PilhaT *pilha) {
   if (pilha == NULL) {
-    debug_print("[%s] pilha == NULL\n", __func__);
+    debug_print("pilha == NULL\n", "");
     return NULL;  // TODO tratar erro
   }
   else {
@@ -40,7 +41,7 @@ void * desempilha(PilhaT *pilha) {
       return pilha->elemento[pilha->topo];
     }
     else {
-      debug_print("[%s] pilha->topo <= 0\n", __func__);
+      debug_print("pilha->topo <= 0\n", "");
       return NULL;  // TODO tratar erro
     }
   }
