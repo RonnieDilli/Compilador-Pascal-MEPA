@@ -23,7 +23,6 @@ typedef struct TabelaSimbT {
   int num_elementos;
 } TabelaSimbT;
 
-
 /*  Estrutura com variaveis auxiliares  */
 
 int procuraElementoTab(TabelaSimbT *, char *);
@@ -32,7 +31,5 @@ int imprimeElementosTab(TabelaSimbT *, char *);
 
 int insereElementosTab(TabelaSimbT *, int);
 
-
 // int criaTabela(TabelaSimb *);
 // int removeElemento(char *);
-

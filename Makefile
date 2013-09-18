@@ -12,5 +12,5 @@ y.tab.c: compilador.y compilador.h
 compilador.o : compilador.h compiladorF.c
 	gcc -c compiladorF.c -o compilador.o
 
-clean : 
+clean :
 	rm -f compilador.tab.* lex.yy.c *.o compilador compilador.output

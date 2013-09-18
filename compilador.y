@@ -2,7 +2,6 @@
 // Testar se funciona corretamente o empilhamento de parâmetros
 // passados por valor ou por referência.
 
-
 %{
 #include <stdio.h>
 #include <ctype.h>
@@ -49,12 +48,8 @@ bloco       :
               comando_composto
               ;
 
-
-
-
 parte_declara_vars:  var
 ;
-
 
 var         : { } VAR declara_vars
             |
@@ -88,7 +83,6 @@ lista_id_var: lista_id_var VIRGULA IDENT
 lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
-
 
 comando_composto: T_BEGIN comandos T_END
 ;
@@ -147,7 +141,6 @@ relacao     : MAIOR_QUE                           { /* TODO: Acabar de escrever 
             | MENOR_QUE
 ;
 
-
 %%
 
 main (int argc, char** argv) {
@@ -180,18 +173,16 @@ main (int argc, char** argv) {
  *  Inicializa as variaveis de controle
  * ------------------------------------------------------------------- */
 
-
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
 
    yyin=fp;
    yyparse();
-   
+
    imprimeElementosTab(tab, "oi"); // DEBUG
 
    id1 = procuraElementoTab(tab, "b"); // DEBUG
 
    return 0;
 }
-

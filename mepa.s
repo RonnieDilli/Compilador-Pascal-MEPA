@@ -3,7 +3,6 @@
 # INICIO macros
 # *****************************************************************
 
-
 # -----------------------------------------------------------------
 #  INPP
 # -----------------------------------------------------------------
@@ -45,7 +44,6 @@
    addq %eax, %esp
 .endm
 
-
 # -----------------------------------------------------------------
 #  CRCT
 # -----------------------------------------------------------------
@@ -53,8 +51,6 @@
 .macro CRCT k
    pushq $\k
 .endm
-
-
 
 # -----------------------------------------------------------------
 #  CRVL
@@ -84,7 +80,6 @@
    movq %ecx, (%eax)
 
 .endm
-
 
 # -----------------------------------------------------------------
 #  CREN
@@ -147,7 +142,7 @@
 #  NADA
 # -----------------------------------------------------------------
 
-.macro NADA 
+.macro NADA
    nop
 .endm
 
@@ -177,18 +172,18 @@
    calq _dsvf
 .endm
 
-_dsvf:   
-   popq %eax  
-   popq %ebx  
+_dsvf:
+   popq %eax
+   popq %ebx
    popq %ecx
    cmpq $0, %ecx
    je  _dsvf_falso
-   pushq %eax   
+   pushq %eax
    ret
 _dsvf_falso:
-   pushq %ebx 
+   pushq %ebx
    ret
-   
+
 # -----------------------------------------------------------------
 #  DSVR - Desvia para rótulo
 #
@@ -208,7 +203,6 @@ _dsvf_falso:
     pushq %eax
     pushq %eax
     ret
-
 
 # -----------------------------------------------------------------
 #  IMPR
@@ -264,7 +258,7 @@ _dsvf_falso:
    imuq %eax, %ebx
    push %ebx
 .endm
-      
+
 # -----------------------------------------------------------------
 #  DIVI
 # A divisão no intel é esquisita. O comando divl não usa dois
@@ -280,7 +274,7 @@ _dsvf_falso:
    idiv %edi     #  faz %edx:%eax / %edi
    push %eax     # empilha o resultado
 .endm
-      
+
 # -----------------------------------------------------------------
 #  INVR
 # -----------------------------------------------------------------
@@ -290,7 +284,7 @@ _dsvf_falso:
    imuq $-1, %eax
    push %eax
 .endm
-      
+
 # -----------------------------------------------------------------
 #  CONJ (E)
 # -----------------------------------------------------------------
@@ -301,7 +295,7 @@ _dsvf_falso:
    and  %eax, %ebx
    push %ebx
 .endm
-      
+
 # -----------------------------------------------------------------
 #  DISJ (OU)
 # -----------------------------------------------------------------
@@ -312,7 +306,7 @@ _dsvf_falso:
    or   %eax, %ebx
    push %ebx
 .endm
-      
+
 # -----------------------------------------------------------------
 #  NEGA (not)
 # -----------------------------------------------------------------
@@ -337,14 +331,13 @@ _dsvf_falso:
 .endm
 
 _cmme:
-   cmpq %eax,  %ebx   
+   cmpq %eax,  %ebx
    jq _cmme_true
    movq $0, %ecx
    ret
 _cmme_true:
    movq $1, %ecx
    ret
-
 
 # -----------------------------------------------------------------
 #  CMMA
@@ -358,7 +351,7 @@ _cmme_true:
 .endm
 
 _cmma:
-   cmpq %eax,  %ebx   
+   cmpq %eax,  %ebx
    jg _cmma_true
    movq $0, %ecx
    ret
@@ -366,7 +359,6 @@ _cmma_true:
    movq $1, %ecx
    ret
 
-   
 # -----------------------------------------------------------------
 #  CMIG
 # -----------------------------------------------------------------
@@ -379,7 +371,7 @@ _cmma_true:
 .endm
 
 _cmig:
-   cmpq %eax,  %ebx   
+   cmpq %eax,  %ebx
    je _cmig_true
    movq $0, %ecx
    ret
@@ -399,7 +391,7 @@ _cmig_true:
 .endm
 
 _cmdg:
-   cmpq %eax,  %ebx   
+   cmpq %eax,  %ebx
    jne _cmdg_true
    movq $0, %ecx
    ret
@@ -419,14 +411,13 @@ _cmdg_true:
 .endm
 
 _cmeg:
-   cmpq %eax,  %ebx   
+   cmpq %eax,  %ebx
    jle _cmle_true
    movq $0, %ecx
    ret
 _cmle_true:
    movq $1, %ecx
    ret
-
 
 # -----------------------------------------------------------------
 #  CMAG
@@ -440,7 +431,7 @@ _cmle_true:
 .endm
 
 _cmag:
-   cmpq %eax,  %ebx   
+   cmpq %eax,  %ebx
    jge _cmge_true
    movq $0, %ecx
    ret
@@ -448,13 +439,11 @@ _cmge_true:
    movq $1, %ecx
    ret
 
-   
-
 # -----------------------------------------------------------------
 # CHPR p,m { M[s+1]:=i+1; M[s+2]:=m; s:= s+2;  i:=p}
 #
 # Alterado para: CHPR p,m { M[s+1]:=m; M[s+2]:=i+1; s:= s+2;  i:=p}
-# 
+#
 # CHPR - A implementação de chamadas de procedimento é diferente da
 # proposta original do livro. O problema é como guardar o ER e depois
 # disso guardar k. É possível fazer, porém fica muito complicado (até
@@ -471,9 +460,8 @@ _cmge_true:
    calq \rot
 .endm
 
-
 # -----------------------------------------------------------------
-# 
+#
 # ENPR k { s++; M[s]:=D[k]; D[k]:=s+1 }
 #
 # -----------------------------------------------------------------
@@ -507,7 +495,6 @@ _cmge_true:
    ret
 .endm
 
-
 # -----------------------------------------------------------------
 #  Macros para depuração
 # -----------------------------------------------------------------
@@ -521,8 +508,6 @@ _cmge_true:
   calq printf
   addq $4, %esp
 .endm
-  
-
 
 # -----------------------------------------------------------------
 #  impime_RA
@@ -536,7 +521,7 @@ RT:       pushq $\k
     pushq $\v
     calq _imprime_RA
  .endm
- 
+
  _imprime_RA:
    popq %ebx  # ER
    popq %ecx  # v
@@ -546,30 +531,25 @@ RT:       pushq $\k
    pushq $strIniRA
    calq printf
    addq $4, %esp
-   
-_impr_vars_locais:   
+
+_impr_vars_locais:
    cmpq $0, %ecx
    jge _fim_vars_locais
    pushq (%eax)
    pushq $strHEX
    calq printf
    addq $8, %esp
-_fim_vars_locais: 
+_fim_vars_locais:
    push %ebx
    ret
-
-
 
 # *****************************************************************
 # FIM macros
 # *****************************************************************
 
-
-
 .section .data
 .equ TAM_D, 10
 .lcomm D TAM_D
-   
 
 entr: .int 0
 strNumOut: .string "%d\n"
@@ -578,16 +558,11 @@ strIniRA: .string "----- strIniRA  --------\n"
 strTR: .string "-----\n"
 strHEX:   .string "%X\n"
 
-
 .section .text
 .equ FIM_PGMA, 1
-.equ SYSCALL, 0x80 
+.equ SYSCALL, 0x80
 
 .globl _start
 _start:
 
 .include "MEPA"
-
-
-   
-

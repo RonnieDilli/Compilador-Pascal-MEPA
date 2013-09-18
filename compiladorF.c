@@ -17,7 +17,6 @@
 #include <string.h>
 #include "compilador.h"
 
-
 /* -------------------------------------------------------------------
  *  variáveis globais
  * ------------------------------------------------------------------- */
@@ -40,7 +39,6 @@ int imprimeErro ( char* erro ) {
   fprintf (stderr, "Erro na linha %d - %s\n", nl, erro);
   exit(-1);
 }
-
 
 /* -------------------------------------------------------------------
  * funcoes auxiliares

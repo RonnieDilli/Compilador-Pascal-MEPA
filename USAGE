@@ -25,6 +25,4 @@ arquivo "compilador.y".
 
 Na segunda parte da disciplina, será mostrado como gerar um autômato a
 pilha (tabela de ações e de desvios) para uma classe de gramáticas
-mais restritas do que esta, porém que segue o mesmo "esquema". 
-
-
+mais restritas do que esta, porém que segue o mesmo "esquema".
