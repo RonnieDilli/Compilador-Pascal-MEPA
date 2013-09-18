@@ -15,9 +15,13 @@
 
 #define DEBUG 1
 
+#ifdef DEBUG
 #define debug_print(fmt, ...) \
-  if (DEBUG) fprintf(stderr, "#DEBUG [%s] ", __func__); \
-    if (DEBUG) do { fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+  fprintf(stderr, "#DEBUG [%s] ", __func__); \
+  do { fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+#else
+#define debug_print(...) {}
+#endif
 
 typedef enum simbolos {
   simb_program, simb_var, simb_begin, simb_end,
