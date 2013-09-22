@@ -1,20 +1,29 @@
 CC=gcc
-CCDEBUG=gcc -g
+CC_DEBUG=gcc -g -DDEBUG
 PROG=compilador
+LEX_C=lex.yy.c
+BISON_C=y.tab.c
+
+PROG_REQ=$(LEX_C) $(BISON_C) $(PROG).o $(PROG).h
+PROG_CC_PARAMS=$(LEX_C) $(PROG).tab.c $(PROG).o tabelasimb.c pilha.c -o $(PROG) -ll -ly -lc
 
 default	:	$(PROG)
 
-$(PROG)	: lex.yy.c y.tab.c $(PROG).o $(PROG).h
-	$(CC) lex.yy.c $(PROG).tab.c $(PROG).o tabelasimb.c pilha.c -o $@ -ll -ly -lc
+debug	:	$(PROG_REQ)
+	CC='$(CC_DEBUG)'
+	$(CC_DEBUG) $(PROG_CC_PARAMS)
 
-lex.yy.c	: $(PROG).l $(PROG).h
+$(PROG)	: $(PROG_REQ)
+	$(CC) $(PROG_CC_PARAMS)
+
+$(LEX_C)	: $(PROG).l $(PROG).h
 	flex $(PROG).l
 
-y.tab.c	: $(PROG).y $(PROG).h
+$(BISON_C)	: $(PROG).y $(PROG).h
 	bison $(PROG).y -d -v
 
 $(PROG).o : $(PROG).h $(PROG)F.c
 	$(CC) -c $(PROG)F.c -o $@
 
 clean :
-	rm -f $(PROG).tab.* lex.yy.c *.o $(PROG) $(PROG).output
+	rm -rf $(PROG).tab.* $(LEX_C) *.o $(PROG) $(PROG).output $(PROG).dSYM

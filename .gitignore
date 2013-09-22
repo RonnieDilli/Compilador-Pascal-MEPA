@@ -18,6 +18,7 @@
 /compilador.tab.h
 /compilador.tab.c
 /compilador.output
+/compilador.dSYM
 /lex.yy.c
 /MEPA
 
