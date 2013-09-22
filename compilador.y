@@ -143,7 +143,7 @@ relacao     : MAIOR_QUE                           { /* TODO: Acabar de escrever 
 
 %%
 
-main (int argc, char** argv) {
+int main (int argc, char** argv) {
    FILE* fp;
    extern FILE* yyin;
 

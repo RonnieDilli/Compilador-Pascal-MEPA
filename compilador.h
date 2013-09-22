@@ -47,7 +47,26 @@ simbolos simbolo, relacao;
 char token[TAM_TOKEN];
 
 /* -------------------------------------------------------------------
- * funcoes auxiliares
+ * Declaracao das funcoes
  * ------------------------------------------------------------------- */
 
-void yyerror (char *s); /*  Arruma erro de compilacao do ProjetoBase  */
+void geraCodigo (char*, char*);
+int imprimeErro ( char*);
+
+/* -------------------------------------------------------------------
+ * Fixes (erros/warnings na compilacao)
+ * ------------------------------------------------------------------- */
+
+void yyerror (char *); /*  Arruma erro de compilacao do ProjetoBase  */
+
+/*  Arruma warning na compilacao do ProjetoBase  */
+/* Default declaration of generated scanner - a define so the user can
+ * easily add parameters.
+ */
+#ifndef YY_DECL
+#define YY_DECL_IS_OURS 1
+
+extern int yylex (void);
+
+#define YY_DECL int yylex (void)
+#endif /* !YY_DECL */

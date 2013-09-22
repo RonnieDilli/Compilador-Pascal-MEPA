@@ -1,16 +1,20 @@
-$DEPURA=1
+CC=gcc
+CCDEBUG=gcc -g
+PROG=compilador
 
-compilador: lex.yy.c y.tab.c compilador.o compilador.h
-	gcc lex.yy.c compilador.tab.c compilador.o tabelasimb.c pilha.c -o compilador -ll -ly -lc
+default	:	$(PROG)
 
-lex.yy.c: compilador.l compilador.h
-	flex compilador.l
+$(PROG)	: lex.yy.c y.tab.c $(PROG).o $(PROG).h
+	$(CC) lex.yy.c $(PROG).tab.c $(PROG).o tabelasimb.c pilha.c -o $@ -ll -ly -lc
 
-y.tab.c: compilador.y compilador.h
-	bison compilador.y -d -v
+lex.yy.c	: $(PROG).l $(PROG).h
+	flex $(PROG).l
 
-compilador.o : compilador.h compiladorF.c
-	gcc -c compiladorF.c -o compilador.o
+y.tab.c	: $(PROG).y $(PROG).h
+	bison $(PROG).y -d -v
+
+$(PROG).o : $(PROG).h $(PROG)F.c
+	$(CC) -c $(PROG)F.c -o $@
 
 clean :
-	rm -f compilador.tab.* lex.yy.c *.o compilador compilador.output
+	rm -f $(PROG).tab.* lex.yy.c *.o $(PROG) $(PROG).output
