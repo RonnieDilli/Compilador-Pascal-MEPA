@@ -8,7 +8,7 @@ typedef enum CategoriaT {
 } CategoriaT;
 
 typedef enum TipoT {
-  INT, BOOLEAN, CHAR, VOID, FUNCTION
+  INTEGER, BOOLEAN, CHAR, VOID, FUNCTION
 } TipoT;
 
 typedef struct ElementoT {
@@ -27,9 +27,11 @@ typedef struct TabelaSimbT {
 
 int procuraElementoTab(TabelaSimbT *, char *);
 
-int imprimeElementosTab(TabelaSimbT *);
-
 int insereElementosTab(TabelaSimbT *, char *);
+
+int atribuiTiposTab(TabelaSimbT *, TipoT, int);
+
+int imprimeElementosTab(TabelaSimbT *);
 
 // int criaTabela(TabelaSimb *);
 // int removeElemento(char *);

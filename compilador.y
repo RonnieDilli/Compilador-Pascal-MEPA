@@ -12,6 +12,7 @@
 #include "pilha.h"
 
 int num_vars, id1, id2, num, *temp_num, nivellexico;
+char *rot;
 TabelaSimbT *tab, tabelaSimbDin;
 PilhaT pilha_s, pilha_e, pilha_t, pilha_f, pilha_rot;
 
@@ -23,8 +24,6 @@ PilhaT pilha_s, pilha_e, pilha_t, pilha_f, pilha_rot;
 %token NUMERO SOMA SUBTRACAO MULTIPLICACAO DIVISAO
 %token OR AND MAIOR_QUE MENOR_QUE
 %token IF THEN ELSE WHILE DO GOTO
-
-%token INTEGER
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -44,8 +43,8 @@ programa    :{
 
 bloco       :
               parte_declara_vars
-              {
-              }
+              { geraCodigoArgs (NULL, "DSVS %s", "R00");
+                rot = "R00"; geraCodigo (rot, "NADA"); empilha(&pilha_rot, rot); }
 
               comando_composto
               ;
@@ -65,15 +64,16 @@ declara_var : { num_vars=0; }
               lista_id_var DOIS_PONTOS
               tipo
               {
+                atribuiTiposTab(tab, INTEGER, num_vars);
                 // tab->elemento[tab->num_elementos].tipo = token;
-                debug_print(".linha=%d: token = %s | tab->elemento[tab->num_elementos-1].tipo = \n", nl, token);
+                // debug_print(".linha=%d: token = %s | tab->elemento[tab->num_elementos].tipo = %d\n", nl, token, tab->elemento[tab->num_elementos].tipo);
                 geraCodigoArgs (NULL, "AMEN %d", num_vars);
                 /* #TODO volta setando o tipo das num_vars variaveis na Tabela tab */
               }
               PONTO_E_VIRGULA
 ;
 
-tipo        : IDENT
+tipo        : IDENT /*  #TODO Adicionar Tipos Basicos: integer, real, char, boolean (and maybe string)  */
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT
@@ -88,7 +88,7 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-comando_composto: T_BEGIN comandos T_END
+comando_composto: T_BEGIN { rot = "R05"; geraCodigo (rot, "NADA"); empilha(&pilha_rot, rot); }  comandos T_END
 ;
 
 comandos    : comandos PONTO_E_VIRGULA comando
@@ -101,12 +101,12 @@ comando     : NUMERO DOIS_PONTOS com_sem_rot
             |
 ;
 
-com_sem_rot : atrib                               { /* TODO: Acabar de escrever a regra */ }
+com_sem_rot : atrib                               { /* #TODO Acabar de escrever a regra */ }
             | com_condic
             | com_repetit
 ;
 
-atrib       : IDENT { id1 = procuraElementoTab(tab, token); } ATRIBUICAO expressao           /* TODO: Confirmar regra */
+atrib       : IDENT { id1 = procuraElementoTab(tab, token); } ATRIBUICAO expressao           /* #TODO Confirmar regra */
               {
                 geraCodigoArgs (NULL, "ARMZ %d,%d", nivellexico, id1);
               }
@@ -119,7 +119,7 @@ com_condic  : IF expressao THEN comando %prec LOWER_THAN_ELSE
 com_repetit : WHILE expressao DO comando
 ;
 
-expressao   : expr_simples relacao   { /* TODO: Acabar de escrever a regra */ }
+expressao   : expr_simples relacao   { /* #TODO Acabar de escrever a regra */ }
             | expr_simples
 ;
 
@@ -142,7 +142,7 @@ fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
             | NUMERO  { temp_num = malloc (sizeof (int));
                         *temp_num = atoi(token);
                         empilha(&pilha_s, temp_num); /* CRCT x */
-                        debug_print(".linha=%d: *temp_num = %d\n", nl, *temp_num );
+                        // debug_print(".linha=%d: *temp_num = %d\n", nl, *temp_num );
                         geraCodigoArgs (NULL, "CRCT %d", *temp_num);
 
                         // temp_num = malloc (sizeof (int));
@@ -160,7 +160,7 @@ fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
                       }
 ;
 
-relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* TODO: Acabar de escrever a regra */
+relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* #TODO Acabar de escrever a regra */
             | MENOR_QUE expr_simples  { geraCodigo (NULL, "CMME"); }
 ;
 
@@ -188,7 +188,7 @@ int main (int argc, char** argv) {
     tab = &tabelaSimbDin;
     tab->num_elementos = 0;
 
-    debug_print("tab->num_elementos = %d\n", tab->num_elementos);
+    // debug_print("tab->num_elementos = %d\n", tab->num_elementos);
 
     // insereElementosTab(tab, 10); // #DEBUG - Teste
 
