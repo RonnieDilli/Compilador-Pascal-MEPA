@@ -18,10 +18,15 @@
 #ifdef DEBUG
 #define debug_print(fmt, ...) \
   fprintf(stderr, "#DEBUG [%s] ", __func__); \
-  do { fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+    fprintf(stderr, fmt, __VA_ARGS__);
 #else
 #define debug_print(...) {}
 #endif
+
+char buf[1023];
+#define geraCodigoArgs(rot, fmt, ...) \
+  sprintf(buf, fmt, __VA_ARGS__); \
+    geraCodigo(rot, buf);
 
 typedef enum simbolos {
   simb_program, simb_var, simb_begin, simb_end,

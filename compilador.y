@@ -12,7 +12,6 @@
 #include "pilha.h"
 
 int num_vars, id1, id2, num, *temp_num, nivellexico;
-char buf[255];
 TabelaSimbT *tab, tabelaSimbDin;
 PilhaT pilha_s, pilha_e, pilha_t, pilha_f, pilha_rot;
 
@@ -68,8 +67,7 @@ declara_var : { num_vars=0; }
               {
                 // tab->elemento[tab->num_elementos].tipo = token;
                 debug_print(".linha=%d: token = %s | tab->elemento[tab->num_elementos-1].tipo = \n", nl, token);
-                sprintf(buf, "AMEN %d", num_vars);
-                geraCodigo (NULL, buf);  /* AMEM */
+                geraCodigoArgs (NULL, "AMEN %d", num_vars);
                 /* #TODO volta setando o tipo das num_vars variaveis na Tabela tab */
               }
               PONTO_E_VIRGULA
@@ -110,8 +108,7 @@ com_sem_rot : atrib                               { /* TODO: Acabar de escrever 
 
 atrib       : IDENT { id1 = procuraElementoTab(tab, token); } ATRIBUICAO expressao           /* TODO: Confirmar regra */
               {
-                sprintf(buf, "ARMZ %d,%d", nivellexico, id1);
-                geraCodigo (NULL, buf);
+                geraCodigoArgs (NULL, "ARMZ %d,%d", nivellexico, id1);
               }
 ;
 
@@ -140,15 +137,13 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
             | IDENT   { id2 = procuraElementoTab(tab, token);
-                        sprintf(buf, "CRVL %d,%d", nivellexico, id2);
-                        geraCodigo (NULL, buf);
+                        geraCodigoArgs (NULL, "CRVL %d,%d", nivellexico, id2);
                       }
             | NUMERO  { temp_num = malloc (sizeof (int));
                         *temp_num = atoi(token);
                         empilha(&pilha_s, temp_num); /* CRCT x */
                         debug_print(".linha=%d: *temp_num = %d\n", nl, *temp_num );
-                        sprintf(buf, "CRCT %d", *temp_num);
-                        geraCodigo (NULL, buf);
+                        geraCodigoArgs (NULL, "CRCT %d", *temp_num);
 
                         // temp_num = malloc (sizeof (int));
                         // *temp_num = 44;
