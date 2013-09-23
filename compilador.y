@@ -11,10 +11,10 @@
 #include "tabelasimb.h"
 #include "pilha.h"
 
-int num_vars, id1, id2, num, aux1;
+int num_vars, id1, id2, num, *temp_num, nivellexico;
 char buf[255];
 TabelaSimbT *tab, tabelaSimbDin;
-PilhaT pilha_s, pilha_e, pilha_t, pilha_f;
+PilhaT pilha_s, pilha_e, pilha_t, pilha_f, pilha_rot;
 
 %}
 
@@ -25,6 +25,8 @@ PilhaT pilha_s, pilha_e, pilha_t, pilha_f;
 %token OR AND MAIOR_QUE MENOR_QUE
 %token IF THEN ELSE WHILE DO GOTO
 
+%token INTEGER
+
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
@@ -32,6 +34,7 @@ PilhaT pilha_s, pilha_e, pilha_t, pilha_f;
 
 programa    :{
              geraCodigo (NULL, "INPP");
+             nivellexico = 0;
              }
              PROGRAM IDENT
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
@@ -63,6 +66,8 @@ declara_var : { num_vars=0; }
               lista_id_var DOIS_PONTOS
               tipo
               {
+                // tab->elemento[tab->num_elementos].tipo = token;
+                debug_print(".linha=%d: token = %s | tab->elemento[tab->num_elementos-1].tipo = \n", nl, token);
                 sprintf(buf, "AMEN %d", num_vars);
                 geraCodigo (NULL, buf);  /* AMEM */
                 /* #TODO volta setando o tipo das num_vars variaveis na Tabela tab */
@@ -74,10 +79,11 @@ tipo        : IDENT
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT
-              { num_vars=num_vars + 1; insereElementosTab(tab, 1);
-                      strcpy(tab->elemento[tab->num_elementos-1].id, token);  /* insere última vars na tabela de símbolos */ }
-            | IDENT { num_vars=num_vars + 1; insereElementosTab(tab, 1);
-                      strcpy(tab->elemento[tab->num_elementos-1].id, token);  /* insere vars na tabela de símbolos */}
+              { num_vars=num_vars + 1; insereElementosTab(tab, token);  /* insere última vars na tabela de símbolos */
+              }
+            | IDENT
+              { num_vars=num_vars + 1; insereElementosTab(tab, token);  /* insere vars na tabela de símbolos */
+              }
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
@@ -102,7 +108,11 @@ com_sem_rot : atrib                               { /* TODO: Acabar de escrever 
             | com_repetit
 ;
 
-atrib       : IDENT ATRIBUICAO expressao          { /* TODO: Confirmar regra */ }
+atrib       : IDENT { id1 = procuraElementoTab(tab, token); } ATRIBUICAO expressao           /* TODO: Confirmar regra */
+              {
+                sprintf(buf, "ARMZ %d,%d", nivellexico, id1);
+                geraCodigo (NULL, buf);
+              }
 ;
 
 com_condic  : IF expressao THEN comando %prec LOWER_THAN_ELSE
@@ -112,33 +122,51 @@ com_condic  : IF expressao THEN comando %prec LOWER_THAN_ELSE
 com_repetit : WHILE expressao DO comando
 ;
 
-expressao   : expr_simples relacao expr_simples   { /* TODO: Acabar de escrever a regra */ }
+expressao   : expr_simples relacao   { /* TODO: Acabar de escrever a regra */ }
             | expr_simples
 ;
 
-expr_simples: expr_simples SOMA termo
-            | expr_simples SUBTRACAO termo
-            | expr_simples OR termo
+expr_simples: expr_simples SOMA termo       { geraCodigo (NULL, "SOMA"); }
+            | expr_simples SUBTRACAO termo  { geraCodigo (NULL, "SUBT"); }
+            | expr_simples OR termo         { geraCodigo (NULL, "DISJ"); }
             | termo
 ;
 
-termo       : fator MULTIPLICACAO fator
-            | fator DIVISAO fator
-            | fator AND fator
+termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
+            | fator DIVISAO fator       { geraCodigo (NULL, "DIVI"); }
+            | fator AND fator           { geraCodigo (NULL, "CONJ"); }
             | fator
 ;
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
-            | IDENT
-            | NUMERO {  num = atoi(token);
-                        empilha(&pilha_s, &num); /* CRCT x */
-                        debug_print(".linha=%d: num = %d\n", nl, num );
-                        aux1 = *(int *)(desempilha(&pilha_s));
-                        debug_print(".linha=%d: aux1 = %d\n", nl, aux1 ); }
+            | IDENT   { id2 = procuraElementoTab(tab, token);
+                        sprintf(buf, "CRVL %d,%d", nivellexico, id2);
+                        geraCodigo (NULL, buf);
+                      }
+            | NUMERO  { temp_num = malloc (sizeof (int));
+                        *temp_num = atoi(token);
+                        empilha(&pilha_s, temp_num); /* CRCT x */
+                        debug_print(".linha=%d: *temp_num = %d\n", nl, *temp_num );
+                        sprintf(buf, "CRCT %d", *temp_num);
+                        geraCodigo (NULL, buf);
+
+                        // temp_num = malloc (sizeof (int));
+                        // *temp_num = 44;
+                        // empilha(&pilha_s, temp_num); /* CRCT x */
+                        // temp_num = malloc (sizeof (int));
+                        // *temp_num = 66;
+                        // empilha(&pilha_s, temp_num); /* CRCT x */
+                        // num = *(int *)(desempilha(&pilha_s));
+                        // debug_print(".linha=%d: num = %d\n", nl, num );
+                        // num = *(int *)(desempilha(&pilha_s));
+                        // debug_print(".linha=%d: num = %d\n", nl, num );
+                        // num = *(int *)(desempilha(&pilha_s));
+                        // debug_print(".linha=%d: num = %d\n", nl, num );
+                      }
 ;
 
-relacao     : MAIOR_QUE                           { /* TODO: Acabar de escrever a regra */ }
-            | MENOR_QUE
+relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* TODO: Acabar de escrever a regra */
+            | MENOR_QUE expr_simples  { geraCodigo (NULL, "CMME"); }
 ;
 
 %%
@@ -167,7 +195,7 @@ int main (int argc, char** argv) {
 
     debug_print("tab->num_elementos = %d\n", tab->num_elementos);
 
-    // insereElementosTab(tab, 10); //DEBUG - Teste
+    // insereElementosTab(tab, 10); // #DEBUG - Teste
 
 /* -------------------------------------------------------------------
  *  Inicializa as variaveis de controle
@@ -180,9 +208,7 @@ int main (int argc, char** argv) {
    yyin=fp;
    yyparse();
 
-   imprimeElementosTab(tab, "oi"); // DEBUG
-
-   id1 = procuraElementoTab(tab, "b"); // DEBUG
+   imprimeElementosTab(tab); // #DEBUG
 
    return 0;
 }

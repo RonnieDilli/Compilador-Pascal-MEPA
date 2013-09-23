@@ -27,18 +27,19 @@ int procuraElementoTab(TabelaSimbT *tab, char *id) {
   return -1;
 }
 
-int insereElementosTab(TabelaSimbT *tab, int novos_elem) {
-  if (tab->num_elementos + novos_elem > MAX_TAB) {
+int insereElementosTab(TabelaSimbT *tab, char *str) {
+  if (tab->num_elementos + 1 > MAX_TAB) {
     fprintf(stderr, "ERRO: *** Tamanho da tabela de simbolos dinamica excedido!\n");
     exit (-1);
   }
   else {
-    tab->num_elementos = tab->num_elementos + novos_elem;
+    strcpy(tab->elemento[tab->num_elementos].id, str);
+    tab->num_elementos = tab->num_elementos + 1;
   }
   return 0;
 }
 
-int imprimeElementosTab(TabelaSimbT *tab, char *id) {
+int imprimeElementosTab(TabelaSimbT *tab) {
   int i;
   debug_print("tab->num_elementos = %d\n", tab->num_elementos); // #DEBUG
   if (tab == NULL) {

@@ -7,7 +7,7 @@ var m,n :  integer;
 begin
   n:=25+37+55-38*3-9+(90-15+(25*35))-2;
 
-  if (m > e) then
+  if (m < e) then
     d:=a-b
   else
     d:=a+b;

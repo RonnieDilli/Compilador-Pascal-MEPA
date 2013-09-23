@@ -16,7 +16,8 @@ int inicializaPilha(PilhaT *pilha) {
 int empilha(PilhaT *pilha, void *novo_elemento) {
   if (pilha == NULL) {
     debug_print("pilha == %s\n", "NULL");
-    return -1;  // TODO tratar erro
+    exit(-2);
+    // return -1;  // TODO tratar erro
   }
   else if (pilha->topo > PILHA_TAM) {
     fprintf(stderr, "ERRO: *** Tamanho da pilha (%d elementos) excedido!\n", PILHA_TAM);
@@ -42,7 +43,8 @@ void * desempilha(PilhaT *pilha) {
     }
     else {
       debug_print("pilha->topo = %d\n", pilha->topo);
-      return NULL;  // TODO tratar erro
+      exit(-2);
+      // return NULL;  // TODO tratar erro
     }
   }
 }

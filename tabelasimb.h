@@ -27,9 +27,9 @@ typedef struct TabelaSimbT {
 
 int procuraElementoTab(TabelaSimbT *, char *);
 
-int imprimeElementosTab(TabelaSimbT *, char *);
+int imprimeElementosTab(TabelaSimbT *);
 
-int insereElementosTab(TabelaSimbT *, int);
+int insereElementosTab(TabelaSimbT *, char *);
 
 // int criaTabela(TabelaSimb *);
 // int removeElemento(char *);
