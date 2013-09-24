@@ -8,7 +8,7 @@ typedef enum CategoriaT {
 } CategoriaT;
 
 typedef enum TipoT {
-  INTEGER, BOOLEAN, CHAR, VOID, FUNCTION
+  T_INTEGER, T_BOOLEAN, T_CHAR, T_VOID, T_FUNCTION, T_UNKNOWN=999
 } TipoT;
 
 typedef struct ElementoT {

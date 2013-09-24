@@ -11,10 +11,11 @@
 #include "tabelasimb.h"
 #include "pilha.h"
 
-int num_vars, id1, id2, num, *temp_num, nivellexico;
+int num_vars, ident_1, ident_2, num, *temp_num, nivellexico;
 char *rot;
 TabelaSimbT *tab, tabelaSimbDin;
 PilhaT pilha_s, pilha_e, pilha_t, pilha_f, pilha_rot;
+TipoT temp_FIXME_remove = T_INTEGER;
 
 %}
 
@@ -24,6 +25,7 @@ PilhaT pilha_s, pilha_e, pilha_t, pilha_f, pilha_rot;
 %token NUMERO SOMA SUBTRACAO MULTIPLICACAO DIVISAO
 %token OR AND MAIOR_QUE MENOR_QUE
 %token IF THEN ELSE WHILE DO GOTO
+%token PROCEDURE FUNCTION INTEGER BOOLEAN
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -64,31 +66,25 @@ declara_var : { num_vars=0; }
               lista_id_var DOIS_PONTOS
               tipo
               {
-                atribuiTiposTab(tab, INTEGER, num_vars);
-                // tab->elemento[tab->num_elementos].tipo = token;
-                // debug_print(".linha=%d: token = %s | tab->elemento[tab->num_elementos].tipo = %d\n", nl, token, tab->elemento[tab->num_elementos].tipo);
                 geraCodigoArgs (NULL, "AMEN %d", num_vars);
-                /* #TODO volta setando o tipo das num_vars variaveis na Tabela tab */
               }
               PONTO_E_VIRGULA
 ;
 
-tipo        : IDENT /*  #TODO Adicionar Tipos Basicos: integer, real, char, boolean (and maybe string)  */
+tipo        : INTEGER { atribuiTiposTab(tab, T_INTEGER, num_vars); }
+            | BOOLEAN { atribuiTiposTab(tab, T_BOOLEAN, num_vars); }
+            | IDENT   { atribuiTiposTab(tab, T_UNKNOWN, num_vars); } /* Tipo Desconhecido(ou nao tratado). #TODO Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT
-              { num_vars=num_vars + 1; insereElementosTab(tab, token);  /* insere última vars na tabela de símbolos */
-              }
-            | IDENT
-              { num_vars=num_vars + 1; insereElementosTab(tab, token);  /* insere vars na tabela de símbolos */
-              }
+lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; insereElementosTab(tab, token); } /* insere última vars na tabela de símbolos */
+            | IDENT                       { num_vars=num_vars + 1; insereElementosTab(tab, token); } /* insere vars na tabela de símbolos */
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-comando_composto: T_BEGIN { rot = "R05"; geraCodigo (rot, "NADA"); empilha(&pilha_rot, rot); }  comandos T_END
+comando_composto: T_BEGIN comandos T_END
 ;
 
 comandos    : comandos PONTO_E_VIRGULA comando
@@ -106,9 +102,9 @@ com_sem_rot : atrib                               { /* #TODO Acabar de escrever 
             | com_repetit
 ;
 
-atrib       : IDENT { id1 = procuraElementoTab(tab, token); } ATRIBUICAO expressao           /* #TODO Confirmar regra */
+atrib       : IDENT { ident_1 = procuraElementoTab(tab, token); } ATRIBUICAO expressao           /* #TODO Confirmar regra */
               {
-                geraCodigoArgs (NULL, "ARMZ %d,%d", nivellexico, id1);
+                geraCodigoArgs (NULL, "ARMZ %d,%d", nivellexico, ident_1);
               }
 ;
 
@@ -116,7 +112,7 @@ com_condic  : IF expressao THEN comando %prec LOWER_THAN_ELSE
             | IF expressao THEN comando ELSE comando
 ;
 
-com_repetit : WHILE expressao DO comando
+com_repetit : WHILE { rot = "R05"; geraCodigo (rot, "NADA"); empilha(&pilha_rot, rot); } expressao DO comando { rot = "R15"; geraCodigo (rot, "NADA"); empilha(&pilha_rot, rot); }
 ;
 
 expressao   : expr_simples relacao   { /* #TODO Acabar de escrever a regra */ }
@@ -136,14 +132,16 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 ;
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
-            | IDENT   { id2 = procuraElementoTab(tab, token);
-                        geraCodigoArgs (NULL, "CRVL %d,%d", nivellexico, id2);
+            | IDENT   { ident_2 = procuraElementoTab(tab, token);
+                        geraCodigoArgs (NULL, "CRVL %d,%d", nivellexico, ident_2);
                       }
-            | NUMERO  { temp_num = malloc (sizeof (int));
-                        *temp_num = atoi(token);
-                        empilha(&pilha_s, temp_num); /* CRCT x */
+            | NUMERO  { 
+                        // temp_num = malloc (sizeof (int));
+                        // *temp_num = atoi(token);
+                        // empilha(&pilha_s, temp_num); /* CRCT x */
                         // debug_print(".linha=%d: *temp_num = %d\n", nl, *temp_num );
-                        geraCodigoArgs (NULL, "CRCT %d", *temp_num);
+                        // geraCodigoArgs (NULL, "CRCT %d", *temp_num);
+                        geraCodigoArgs (NULL, "CRCT %d", atoi(token));
 
                         // temp_num = malloc (sizeof (int));
                         // *temp_num = 44;

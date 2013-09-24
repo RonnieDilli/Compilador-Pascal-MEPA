@@ -12,7 +12,6 @@ int procuraElementoTab(TabelaSimbT *tab, char *id) {
     return -1;
   }
   else if (tab->num_elementos > 0) {
-    debug_print("[else if] tab->num_elementos = %d\n", tab->num_elementos);
     i = (tab->num_elementos - 1);
     while (i >= 0) {
       debug_print("tab->elemento[%d].id = %s\n", i, tab->elemento[i].id);
@@ -41,15 +40,14 @@ int insereElementosTab(TabelaSimbT *tab, char *str) {
 
 int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo, int n) {
   int i;
-  debug_print("tab->num_elementos = %d , n = %d\n", tab->num_elementos, n);
   if (tab == NULL) {
     return -1;
   }
-  else if (tab->num_elementos - n > 0) {
+  else if (tab->num_elementos - n >= 0) {
     debug_print("[else if] tab->num_elementos = %d , n = %d\n", tab->num_elementos, n);
     for (i = 0; i < n; i++) {
-      debug_print("tab->elemento[%d].tipo = %d\n", i, tab->elemento[i].tipo);
-      tab->elemento[tab->num_elementos-i].tipo = tipo;
+      tab->elemento[tab->num_elementos-i-1].tipo = tipo;
+      debug_print("[for] tab->elemento[tab->num_elementos-%d-1].tipo = %d\n", i, tab->elemento[tab->num_elementos-i-1].tipo);
     }
     debug_print("i = [%d]\n", i);
     return i;
@@ -66,8 +64,8 @@ int imprimeElementosTab(TabelaSimbT *tab) {
   else if (tab->num_elementos > 0) {
     i = (tab->num_elementos - 1);
     while (i >= 0)  {
-      debug_print("[while] tab->elemento[%d].id = %s\n", i, tab->elemento[i].id);
-      debug_print("[while] tab->elemento[%d].tipo = %d\n", i, tab->elemento[i].tipo);
+      debug_print("[while] tab->elemento[%d].id= %s  tipo(cod)= %d\n", i, tab->elemento[i].id, tab->elemento[i].tipo);
+      // debug_print("[while] tab->elemento[%d].tipo = %d\n", i, tab->elemento[i].tipo);
       i--;
     }
   }
