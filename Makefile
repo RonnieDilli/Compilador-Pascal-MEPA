@@ -5,7 +5,7 @@ LEX_C=lex.yy.c
 BISON_C=y.tab.c
 
 PROG_REQ=$(LEX_C) $(BISON_C) $(PROG).o $(PROG).h
-PROG_CC_PARAMS=$(LEX_C) $(PROG).tab.c $(PROG).o tabelasimb.c pilha.c -o $(PROG) -ll -ly -lc
+PROG_CC_PARAMS=$(LEX_C) $(PROG).tab.c $(PROG).o tabelasimb.c pilha.c aux.c -o $(PROG) -ll -ly -lc
 
 default	:	$(PROG)
 

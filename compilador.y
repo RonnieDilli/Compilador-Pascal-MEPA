@@ -10,8 +10,9 @@
 #include "compilador.h"
 #include "tabelasimb.h"
 #include "pilha.h"
+#include "aux.h"
 
-int num_vars, ident_1, ident_2, num, *temp_num, nivellexico;
+int num_vars, ident_1, ident_2, num, *temp_num, nivellexico, cont_rotulo;
 char *rot;
 TabelaSimbT *tab, tabelaSimbDin;
 PilhaT pilha_s, pilha_e, pilha_t, pilha_f, pilha_rot;
@@ -46,7 +47,8 @@ programa    :{
 bloco       :
               parte_declara_vars
               { geraCodigoArgs (NULL, "DSVS %s", "R00");
-                rot = "R00"; geraCodigo (rot, "NADA"); empilha(&pilha_rot, rot); }
+                geraRotulo(&rot, &cont_rotulo);
+                geraCodigo (rot, "NADA"); empilha(&pilha_rot, rot); }
 
               comando_composto
               ;
@@ -112,7 +114,17 @@ com_condic  : IF expressao THEN comando %prec LOWER_THAN_ELSE
             | IF expressao THEN comando ELSE comando
 ;
 
-com_repetit : WHILE { rot = "R05"; geraCodigo (rot, "NADA"); empilha(&pilha_rot, rot); } expressao DO comando { rot = "R15"; geraCodigo (rot, "NADA"); empilha(&pilha_rot, rot); }
+com_repetit : WHILE {
+                      geraRotulo(&rot, &cont_rotulo);
+                      geraCodigo (rot, "NADA");
+                      empilha(&pilha_rot, rot);
+                    }
+               expressao DO comando
+                    {
+                      geraRotulo(&rot, &cont_rotulo);
+                      geraCodigo (rot, "NADA");
+                      empilha(&pilha_rot, rot);
+                    }
 ;
 
 expressao   : expr_simples relacao   { /* #TODO Acabar de escrever a regra */ }
@@ -185,6 +197,7 @@ int main (int argc, char** argv) {
 
     tab = &tabelaSimbDin;
     tab->num_elementos = 0;
+    cont_rotulo = 0;
 
     // debug_print("tab->num_elementos = %d\n", tab->num_elementos);
 
