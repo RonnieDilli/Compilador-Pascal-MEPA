@@ -16,7 +16,6 @@ int num_vars, ident_1, ident_2, num, *temp_num, nivellexico, cont_rotulo;
 char *rot;
 TabelaSimbT *tab, tabelaSimbDin;
 PilhaT pilha_s, pilha_e, pilha_t, pilha_f, pilha_rot;
-TipoT temp_FIXME_remove = T_INTEGER;
 
 %}
 
@@ -33,30 +32,21 @@ TipoT temp_FIXME_remove = T_INTEGER;
 
 %%
 
-programa    :{
-             geraCodigo (NULL, "INPP");
-             nivellexico = 0;
-             }
-             PROGRAM IDENT
-             ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
-             bloco PONTO {
-             geraCodigo (NULL, "PARA");
-             }
+programa    : { geraCodigo (NULL, "INPP"); nivellexico = 0; }
+              PROGRAM IDENT ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA bloco PONTO
+              { geraCodigo (NULL, "PARA"); }
 ;
 
-bloco       :
-              parte_declara_vars
-              { geraCodigoArgs (NULL, "DSVS %s", "R00");
-                geraRotulo(&rot, &cont_rotulo);
+bloco       : parte_declara_vars
+              { geraCodigoArgs (NULL, "DSVS %s", "R00"); geraRotulo(&rot, &cont_rotulo);
                 geraCodigo (rot, "NADA"); empilha(&pilha_rot, rot); }
-
               comando_composto
-              ;
+;
 
 parte_declara_vars:  var
 ;
 
-var         : { } VAR declara_vars
+var         : VAR declara_vars
             |
 ;
 
@@ -65,11 +55,7 @@ declara_vars: declara_vars declara_var
 ;
 
 declara_var : { num_vars=0; }
-              lista_id_var DOIS_PONTOS
-              tipo
-              {
-                geraCodigoArgs (NULL, "AMEN %d", num_vars);
-              }
+              lista_id_var DOIS_PONTOS tipo { geraCodigoArgs (NULL, "AMEM %d", num_vars); }
               PONTO_E_VIRGULA
 ;
 
@@ -99,35 +85,29 @@ comando     : NUMERO DOIS_PONTOS com_sem_rot
             |
 ;
 
-com_sem_rot : atrib                               { /* #TODO Acabar de escrever a regra */ }
+com_sem_rot : atrib       /* #TODO Acabar de escrever a regra */
             | com_condic
             | com_repetit
 ;
 
-atrib       : IDENT { ident_1 = procuraElementoTab(tab, token); } ATRIBUICAO expressao           /* #TODO Confirmar regra */
-              {
-                geraCodigoArgs (NULL, "ARMZ %d,%d", nivellexico, ident_1);
-              }
+atrib       : IDENT                 { ident_1 = procuraElementoTab(tab, token); }
+              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivellexico, ident_1); }  /* #TODO Confirmar regra */
 ;
 
 com_condic  : IF expressao THEN comando %prec LOWER_THAN_ELSE
             | IF expressao THEN comando ELSE comando
 ;
 
-com_repetit : WHILE {
-                      geraRotulo(&rot, &cont_rotulo);
+com_repetit : WHILE { geraRotulo(&rot, &cont_rotulo);
                       geraCodigo (rot, "NADA");
-                      empilha(&pilha_rot, rot);
-                    }
-               expressao DO comando
-                    {
-                      geraRotulo(&rot, &cont_rotulo);
+                      empilha(&pilha_rot, rot); }
+              expressao DO comando
+                    { geraRotulo(&rot, &cont_rotulo);
                       geraCodigo (rot, "NADA");
-                      empilha(&pilha_rot, rot);
-                    }
+                      empilha(&pilha_rot, rot); }
 ;
 
-expressao   : expr_simples relacao   { /* #TODO Acabar de escrever a regra */ }
+expressao   : expr_simples relacao          /* #TODO Acabar de escrever a regra */
             | expr_simples
 ;
 
@@ -145,15 +125,13 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
             | IDENT   { ident_2 = procuraElementoTab(tab, token);
-                        geraCodigoArgs (NULL, "CRVL %d,%d", nivellexico, ident_2);
-                      }
-            | NUMERO  { 
+                        geraCodigoArgs (NULL, "CRVL %d,%d", nivellexico, ident_2); }
+            | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token)); }
                         // temp_num = malloc (sizeof (int));
                         // *temp_num = atoi(token);
                         // empilha(&pilha_s, temp_num); /* CRCT x */
                         // debug_print(".linha=%d: *temp_num = %d\n", nl, *temp_num );
                         // geraCodigoArgs (NULL, "CRCT %d", *temp_num);
-                        geraCodigoArgs (NULL, "CRCT %d", atoi(token));
 
                         // temp_num = malloc (sizeof (int));
                         // *temp_num = 44;
@@ -167,7 +145,6 @@ fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
                         // debug_print(".linha=%d: num = %d\n", nl, num );
                         // num = *(int *)(desempilha(&pilha_s));
                         // debug_print(".linha=%d: num = %d\n", nl, num );
-                      }
 ;
 
 relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* #TODO Acabar de escrever a regra */

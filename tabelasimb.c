@@ -65,7 +65,6 @@ int imprimeElementosTab(TabelaSimbT *tab) {
     i = (tab->num_elementos - 1);
     while (i >= 0)  {
       debug_print("[while] tab->elemento[%d].id= %s  tipo(cod)= %d\n", i, tab->elemento[i].id, tab->elemento[i].tipo);
-      // debug_print("[while] tab->elemento[%d].tipo = %d\n", i, tab->elemento[i].tipo);
       i--;
     }
   }
