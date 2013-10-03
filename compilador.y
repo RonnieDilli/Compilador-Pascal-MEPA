@@ -13,7 +13,7 @@
 #include "aux.h"
 
 int num_vars, ident_1, ident_2, nivellexico, cont_rotulo; /* #DEBUG vars: num, *temp_num, */
-char *rotulo_mepa;
+char *rotulo_mepa_ult, *rotulo_mepa_pen;
 TabelaSimbT *tab, tabelaSimbDin;
 PilhaT pilha_rot, pilha_s, pilha_e, pilha_t, pilha_f;
 
@@ -38,8 +38,9 @@ programa    : { geraCodigo (NULL, "INPP"); nivellexico = 0; }
 ;
 
 bloco       : parte_declara_vars
-              { geraCodigoArgs (NULL, "DSVS %s", "R00"); geraRotulo(&rotulo_mepa, &cont_rotulo);
-                geraCodigo (rotulo_mepa, "NADA"); empilha(&pilha_rot, rotulo_mepa); }
+              { geraCodigoArgs (NULL, "DSVS %s", "R00"); geraRotulo(&rotulo_mepa_ult, &cont_rotulo); empilha(&pilha_rot, rotulo_mepa_ult); }
+              procs_funcs
+              { rotulo_mepa_ult=desempilha(&pilha_rot); geraCodigo (rotulo_mepa_ult, "NADA"); }
               comando_composto
 ;
 
@@ -72,6 +73,11 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
+procs_funcs : PROCEDURE IDENT ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES PONTO_E_VIRGULA parte_declara_vars procs_funcs comando_composto procs_funcs   /* #TODO Arrumar regra */
+            | FUNCTION IDENT ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES DOIS_PONTOS tipo PONTO_E_VIRGULA parte_declara_vars procs_funcs comando_composto procs_funcs   /* #TODO Arrumar regra */
+            |
+;
+
 comando_composto: T_BEGIN comandos T_END
 ;
 
@@ -79,7 +85,7 @@ comandos    : comandos PONTO_E_VIRGULA comando
             | comando
 ;
 
-comando     : NUMERO DOIS_PONTOS com_sem_rot
+comando     : NUMERO DOIS_PONTOS com_sem_rot  /* #TODO Tratar rotulo_pascal aqui */
             | comando_composto
             | com_sem_rot
             |
@@ -98,13 +104,13 @@ com_condic  : IF expressao THEN comando %prec LOWER_THAN_ELSE
             | IF expressao THEN comando ELSE comando
 ;
 
-com_repetit : WHILE { geraRotulo(&rotulo_mepa, &cont_rotulo);
-                      geraCodigo (rotulo_mepa, "NADA");
-                      empilha(&pilha_rot, rotulo_mepa); }
-              expressao DO comando
-                    { geraRotulo(&rotulo_mepa, &cont_rotulo);
-                      geraCodigo (rotulo_mepa, "NADA");
-                      empilha(&pilha_rot, rotulo_mepa); }
+com_repetit : WHILE { geraRotulo(&rotulo_mepa_pen, &cont_rotulo); empilha(&pilha_rot, rotulo_mepa_pen);
+                      geraCodigo (rotulo_mepa_pen, "NADA");
+                      geraRotulo(&rotulo_mepa_ult, &cont_rotulo); empilha(&pilha_rot, rotulo_mepa_ult); }
+              expressao   { geraCodigoArgs (NULL, "DSVF %s", rotulo_mepa_ult); } 
+              DO comando  { rotulo_mepa_ult=desempilha(&pilha_rot); rotulo_mepa_pen=desempilha(&pilha_rot);
+                            geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa_pen);
+                            geraCodigo (rotulo_mepa_ult, "NADA"); }
 ;
 
 expressao   : expr_simples relacao          /* #TODO Acabar de escrever a regra */

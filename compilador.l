@@ -43,6 +43,18 @@ var      { simbolo = simb_var;
   return VAR;
 }
 
+procedure { simbolo  = simb_procedure;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME("procedure");
+  return PROCEDURE;
+}
+
+function { simbolo  = simb_function;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME("function");
+  return FUNCTION;
+}
+
 begin { simbolo = simb_begin;
   strncpy (token, yytext, TAM_TOKEN);
   IMPRIME("begin");
