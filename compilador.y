@@ -154,44 +154,43 @@ relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* #TODO
 %%
 
 int main (int argc, char** argv) {
-   FILE* fp;
-   extern FILE* yyin;
+  FILE* fp;
+  extern FILE* yyin;
 
-   if (argc<2 || argc>2) {
-         printf("usage compilador <arq>a %d\n", argc);
-         return(-1);
-      }
+  if (argc<2 || argc>2) {
+    printf("usage compilador <arq>a %d\n", argc);
+    return(-1);
+  }
 
-   fp=fopen (argv[1], "r");
-   if (fp == NULL) {
-      printf("usage compilador <arq>b\n");
-      return(-1);
-   }
+  fp=fopen (argv[1], "r");
+  if (fp == NULL) {
+    printf("usage compilador <arq>b\n");
+    return(-1);
+  }
 
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de Símbolos Dinamica (pilha)
  * ------------------------------------------------------------------- */
 
-    tab = &tabelaSimbDin;
-    tab->num_elementos = 0;
-    cont_rotulo = 0;
-
-    // debug_print("tab->num_elementos = %d\n", tab->num_elementos);
-
-    // insereElementosTab(tab, 10); // #DEBUG - Teste
+  tab = &tabelaSimbDin;
+  tab->num_elementos = 0;
 
 /* -------------------------------------------------------------------
  *  Inicializa as variaveis de controle
  * ------------------------------------------------------------------- */
 
+  cont_rotulo = 0;
+
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
 
-   yyin=fp;
-   yyparse();
+  yyin=fp;
+  yyparse();
 
-   imprimeElementosTab(tab); // #DEBUG
+#ifdef DEBUG
+  imprimeElementosTab(tab); // #DEBUG
+#endif
 
-   return 0;
+  return 0;
 }
