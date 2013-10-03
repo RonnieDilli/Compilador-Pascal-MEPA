@@ -12,10 +12,10 @@
 #include "pilha.h"
 #include "aux.h"
 
-int num_vars, ident_1, ident_2, num, *temp_num, nivellexico, cont_rotulo;
-char *rot;
+int num_vars, ident_1, ident_2, nivellexico, cont_rotulo; /* #DEBUG vars: num, *temp_num, */
+char *rotulo_mepa;
 TabelaSimbT *tab, tabelaSimbDin;
-PilhaT pilha_s, pilha_e, pilha_t, pilha_f, pilha_rot;
+PilhaT pilha_rot, pilha_s, pilha_e, pilha_t, pilha_f;
 
 %}
 
@@ -38,8 +38,8 @@ programa    : { geraCodigo (NULL, "INPP"); nivellexico = 0; }
 ;
 
 bloco       : parte_declara_vars
-              { geraCodigoArgs (NULL, "DSVS %s", "R00"); geraRotulo(&rot, &cont_rotulo);
-                geraCodigo (rot, "NADA"); empilha(&pilha_rot, rot); }
+              { geraCodigoArgs (NULL, "DSVS %s", "R00"); geraRotulo(&rotulo_mepa, &cont_rotulo);
+                geraCodigo (rotulo_mepa, "NADA"); empilha(&pilha_rot, rotulo_mepa); }
               comando_composto
 ;
 
@@ -98,13 +98,13 @@ com_condic  : IF expressao THEN comando %prec LOWER_THAN_ELSE
             | IF expressao THEN comando ELSE comando
 ;
 
-com_repetit : WHILE { geraRotulo(&rot, &cont_rotulo);
-                      geraCodigo (rot, "NADA");
-                      empilha(&pilha_rot, rot); }
+com_repetit : WHILE { geraRotulo(&rotulo_mepa, &cont_rotulo);
+                      geraCodigo (rotulo_mepa, "NADA");
+                      empilha(&pilha_rot, rotulo_mepa); }
               expressao DO comando
-                    { geraRotulo(&rot, &cont_rotulo);
-                      geraCodigo (rot, "NADA");
-                      empilha(&pilha_rot, rot); }
+                    { geraRotulo(&rotulo_mepa, &cont_rotulo);
+                      geraCodigo (rotulo_mepa, "NADA");
+                      empilha(&pilha_rot, rotulo_mepa); }
 ;
 
 expressao   : expr_simples relacao          /* #TODO Acabar de escrever a regra */

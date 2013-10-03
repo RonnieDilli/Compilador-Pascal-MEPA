@@ -4,7 +4,7 @@
 #define MAX_ID  255
 
 typedef enum CategoriaT {
-  VS, TEST
+  FUN, PF, PROC, ROT, VS
 } CategoriaT;
 
 typedef enum TipoT {
