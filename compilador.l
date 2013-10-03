@@ -7,7 +7,7 @@
 #include "compilador.tab.h"
 
 //#define IMPRIME(STR) {};
-#define IMPRIME(STR) printf("%s    # %s \n", STR, token);
+#define IMPRIME(STR) printf("%-20s # %s \n", STR, token);
 
 int nl = 1;
 
@@ -33,175 +33,175 @@ comentario "(*".*"*)"
 
 program { simbolo  = simb_program;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME("program            ");
+  IMPRIME("program");
   return PROGRAM;
 }
 
 var      { simbolo = simb_var;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME("var                ");
+  IMPRIME("var");
   return VAR;
 }
 
 begin { simbolo = simb_begin;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME("begin              ");
+  IMPRIME("begin");
   return T_BEGIN;
 }
 
 end { simbolo = simb_end;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME("end                ");
+  IMPRIME("end");
   return T_END;
 }
 
 := { simbolo = simb_atribuicao;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" atribuicao        ");
+  IMPRIME(" atribuicao");
   return ATRIBUICAO;
 }
 
 \; { simbolo = simb_ponto_e_virgula;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" pt_virgula        ");
+  IMPRIME(" pt_virgula");
   return PONTO_E_VIRGULA;
 }
 
 \: { simbolo = simb_dois_pontos;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" dois pontos       ");
+  IMPRIME(" dois pontos");
   return DOIS_PONTOS;
 }
 
 \, { simbolo = simb_virgula;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" virgula           ");
+  IMPRIME(" virgula");
   return VIRGULA;
 }
 
 \. { simbolo = simb_ponto;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" ponto             ");
+  IMPRIME(" ponto");
   return PONTO;
 }
 
 \(  { simbolo = simb_abre_parenteses;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" abre_parenteses   ");
+  IMPRIME(" abre_parenteses");
   return ABRE_PARENTESES;
 }
 
 \)  { simbolo = simb_fecha_parenteses;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" fecha_parenteses  ");
+  IMPRIME(" fecha_parenteses");
   return FECHA_PARENTESES;
 }
 
 \+  { simbolo = simb_soma;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" soma              ");
+  IMPRIME(" soma");
   return SOMA;
 }
 
 \-  { simbolo = simb_subtracao;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" subtracao         ");
+  IMPRIME(" subtracao");
   return SUBTRACAO;
 }
 
 \*  { simbolo = simb_multiplicacao;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" multiplicacao     ");
+  IMPRIME(" multiplicacao");
   return MULTIPLICACAO;
 }
 
 div { simbolo = simb_divisao;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" divisao           ");
+  IMPRIME(" divisao");
   return DIVISAO;
 }
 
 or { simbolo = simb_or;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" 'ou' logico       ");
+  IMPRIME(" 'ou' logico");
   return OR;
 }
 
 and { simbolo = simb_and;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" 'e' logico        ");
+  IMPRIME(" 'e' logico");
   return OR;
 }
 
 \>  { simbolo = simb_maior_que;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" maior que         ");
+  IMPRIME(" maior que");
   return MAIOR_QUE;
 }
 
 \<  { simbolo = simb_menor_que;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" menor que         ");
+  IMPRIME(" menor que");
   return MENOR_QUE;
 }
 
 if { simbolo = simb_if;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" if                ");
+  IMPRIME(" if");
   return IF;
 }
 
 then { simbolo = simb_then;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" then              ");
+  IMPRIME(" then");
   return THEN;
 }
 
 else { simbolo = simb_else;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" else              ");
+  IMPRIME(" else");
   return ELSE;
 }
 
 while { simbolo = simb_while;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" while             ");
+  IMPRIME(" while");
   return WHILE;
 }
 
 do { simbolo = simb_do;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" do                ");
+  IMPRIME(" do");
   return DO;
 }
 
 goto { simbolo = simb_go_to;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" GoTo              ");
+  IMPRIME(" goto");
   return GOTO;
 }
 
 integer { simbolo = simb_integer;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" integer           ");
+  IMPRIME(" integer");
   return INTEGER;
 }
 
 boolean { simbolo = simb_boolean;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" boolean           ");
+  IMPRIME(" boolean");
   return BOOLEAN;
 }
 
 {numero} { simbolo = simb_numero;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" numero            ");
+  IMPRIME(" numero");
   return NUMERO;
 }
 
 {ident} { simbolo = simb_identificador;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" ident             ");
+  IMPRIME(" ident");
   return IDENT;
 }
 
