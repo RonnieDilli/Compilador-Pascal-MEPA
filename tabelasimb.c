@@ -26,7 +26,7 @@ int procuraElementoTab(TabelaSimbT *tab, char *id) {
   return -1;
 }
 
-int insereElementosTab(TabelaSimbT *tab, char *str) {
+int insereElementoTab(TabelaSimbT *tab, char *str) {
   if (tab->num_elementos + 1 > MAX_TAB) {
     fprintf(stderr, "ERRO: *** Tamanho da tabela de simbolos dinamica excedido!\n");
     exit (-1);

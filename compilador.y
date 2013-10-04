@@ -38,9 +38,10 @@ programa    : { geraCodigo (NULL, "INPP"); nivellexico = 0; }
 ;
 
 bloco       : parte_declara_vars
-              { geraCodigoArgs (NULL, "DSVS %s", "R00"); geraRotulo(&rotulo_mepa_ult, &cont_rotulo); empilha(&pilha_rot, rotulo_mepa_ult); }
+              { geraRotulo(&rotulo_mepa_ult, &cont_rotulo, &pilha_rot);
+                geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa_ult); }
               procs_funcs
-              { rotulo_mepa_ult=desempilha(&pilha_rot); geraCodigo (rotulo_mepa_ult, "NADA"); }
+              { geraCodigo (desempilha(&pilha_rot), "NADA"); }
               comando_composto
 ;
 
@@ -65,8 +66,8 @@ tipo        : INTEGER { atribuiTiposTab(tab, T_INTEGER, num_vars); }
             | IDENT   { atribuiTiposTab(tab, T_UNKNOWN, num_vars); } /* Tipo Desconhecido(ou nao tratado). #TODO Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; insereElementosTab(tab, token); } /* insere última vars na tabela de símbolos */
-            | IDENT                       { num_vars=num_vars + 1; insereElementosTab(tab, token); } /* insere vars na tabela de símbolos */
+lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; insereElementoTab(tab, token); } /* insere última vars na tabela de símbolos */
+            | IDENT                       { num_vars=num_vars + 1; insereElementoTab(tab, token); } /* insere vars na tabela de símbolos */
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
@@ -104,10 +105,10 @@ com_condic  : IF expressao THEN comando %prec LOWER_THAN_ELSE
             | IF expressao THEN comando ELSE comando
 ;
 
-com_repetit : WHILE { geraRotulo(&rotulo_mepa_pen, &cont_rotulo); empilha(&pilha_rot, rotulo_mepa_pen);
+com_repetit : WHILE { geraRotulo(&rotulo_mepa_pen, &cont_rotulo, &pilha_rot);
                       geraCodigo (rotulo_mepa_pen, "NADA");
-                      geraRotulo(&rotulo_mepa_ult, &cont_rotulo); empilha(&pilha_rot, rotulo_mepa_ult); }
-              expressao   { geraCodigoArgs (NULL, "DSVF %s", rotulo_mepa_ult); } 
+                      geraRotulo(&rotulo_mepa_ult, &cont_rotulo, &pilha_rot); }
+              expressao   { geraCodigoArgs (NULL, "DSVF %s", rotulo_mepa_ult); }
               DO comando  { rotulo_mepa_ult=desempilha(&pilha_rot); rotulo_mepa_pen=desempilha(&pilha_rot);
                             geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa_pen);
                             geraCodigo (rotulo_mepa_ult, "NADA"); }

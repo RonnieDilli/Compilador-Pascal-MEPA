@@ -2,4 +2,10 @@
 /*  Define tamanho maximo do rotulo  */
 #define ROTULO_TAM 7
 
-int geraRotulo(char **, int *);
+typedef enum OperacaoT {
+  OP_COMPARACAO, OP_ATRIBUICAO,
+} OperacaoT;
+
+int geraRotulo(char **, int *, PilhaT *);
+
+int confereTipo(OperacaoT, TipoT, TipoT);

@@ -27,7 +27,7 @@ typedef struct TabelaSimbT {
 
 int procuraElementoTab(TabelaSimbT *, char *);
 
-int insereElementosTab(TabelaSimbT *, char *);
+int insereElementoTab(TabelaSimbT *, char *);
 
 int atribuiTiposTab(TabelaSimbT *, TipoT, int);
 
