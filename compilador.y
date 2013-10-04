@@ -13,7 +13,7 @@
 #include "aux.h"
 
 int num_vars, ident_1, ident_2, nivellexico, cont_rotulo; /* #DEBUG vars: num, *temp_num, */
-char *rotulo_mepa_ult, *rotulo_mepa_pen;
+char *rotulo_mepa, *rotulo_mepa_temp;
 TabelaSimbT *tab, tabelaSimbDin;
 PilhaT pilha_rot, pilha_s, pilha_e, pilha_t, pilha_f;
 
@@ -38,8 +38,8 @@ programa    : { geraCodigo (NULL, "INPP"); nivellexico = 0; }
 ;
 
 bloco       : parte_declara_vars
-              { geraRotulo(&rotulo_mepa_ult, &cont_rotulo, &pilha_rot);
-                geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa_ult); }
+              { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
+                geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
               procs_funcs
               { geraCodigo (desempilha(&pilha_rot), "NADA"); }
               comando_composto
@@ -98,20 +98,29 @@ com_sem_rot : atrib       /* #TODO Acabar de escrever a regra */
 ;
 
 atrib       : IDENT                 { ident_1 = procuraElementoTab(tab, token); }
-              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivellexico, ident_1); }  /* #TODO Confirmar regra */
+              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivellexico, ident_1); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
 ;
 
-com_condic  : IF expressao THEN comando %prec LOWER_THAN_ELSE
-            | IF expressao THEN comando ELSE comando
+com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }
+            | if_simples ELSE { rotulo_mepa_temp=desempilha(&pilha_rot);
+                                geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
+                                geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa);
+                                geraCodigo (rotulo_mepa_temp, "NADA"); }
+              comando         { geraCodigo (desempilha(&pilha_rot), "NADA"); }
 ;
 
-com_repetit : WHILE { geraRotulo(&rotulo_mepa_pen, &cont_rotulo, &pilha_rot);
-                      geraCodigo (rotulo_mepa_pen, "NADA");
-                      geraRotulo(&rotulo_mepa_ult, &cont_rotulo, &pilha_rot); }
-              expressao   { geraCodigoArgs (NULL, "DSVF %s", rotulo_mepa_ult); }
-              DO comando  { rotulo_mepa_ult=desempilha(&pilha_rot); rotulo_mepa_pen=desempilha(&pilha_rot);
-                            geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa_pen);
-                            geraCodigo (rotulo_mepa_ult, "NADA"); }
+if_simples  : IF            { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); }
+              expressao     { geraCodigoArgs (NULL, "DSVF %s", rotulo_mepa); }
+              THEN comando
+;
+
+com_repetit : WHILE       { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
+                            geraCodigo (rotulo_mepa, "NADA"); }
+              expressao   { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
+                            geraCodigoArgs (NULL, "DSVF %s", rotulo_mepa); }
+              DO comando  { rotulo_mepa=desempilha(&pilha_rot);
+                            geraCodigoArgs (NULL, "DSVS %s", desempilha(&pilha_rot));
+                            geraCodigo (rotulo_mepa, "NADA"); }
 ;
 
 expressao   : expr_simples relacao          /* #TODO Acabar de escrever a regra */
@@ -132,7 +141,7 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
             | IDENT   { ident_2 = procuraElementoTab(tab, token);
-                        geraCodigoArgs (NULL, "CRVL %d,%d", nivellexico, ident_2); }
+                        geraCodigoArgs (NULL, "CRVL %d,%d", nivellexico, ident_2); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
             | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token)); }
                         // temp_num = malloc (sizeof (int));
                         // *temp_num = atoi(token);
