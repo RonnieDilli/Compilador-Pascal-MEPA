@@ -17,4 +17,14 @@ int geraRotulo(char **novo_rotulo, int *contador, PilhaT *pilha_rot) {
   return 0;
 }
 
+int empilhaTipoT(PilhaT *pilha, TipoT novo_tipo) {
+  TipoT *tipo_aux;
+
+  tipo_aux = malloc (sizeof (TipoT));
+  *tipo_aux = novo_tipo;
+  empilha(pilha, tipo_aux);
+
+  return 0;
+}
+
 int confereTipo(OperacaoT op, TipoT tipo_esperado, TipoT tipo_obtido);

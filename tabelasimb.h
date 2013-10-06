@@ -32,6 +32,3 @@ int insereElementoTab(TabelaSimbT *, char *);
 int atribuiTiposTab(TabelaSimbT *, TipoT, int);
 
 int imprimeElementosTab(TabelaSimbT *);
-
-// int criaTabela(TabelaSimb *);
-// int removeElemento(char *);

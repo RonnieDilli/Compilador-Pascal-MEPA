@@ -12,10 +12,13 @@
 #include "pilha.h"
 #include "aux.h"
 
-int num_vars, ident_1, ident_2, nivellexico, cont_rotulo; /* #DEBUG vars: num, *temp_num, */
-char *rotulo_mepa, *rotulo_mepa_temp;
+int num_vars, ident_1, ident_2, nivellexico, cont_rotulo; /* #DEBUG vars: num, *temp_num, i */
+char *rotulo_mepa, *rotulo_mepa_aux;
+
 TabelaSimbT *tab, tabelaSimbDin;
-PilhaT pilha_rot, pilha_s, pilha_e, pilha_t, pilha_f;
+PilhaT pilha_rot, pilha_tipos;
+
+TipoT tipo_aux;
 
 %}
 
@@ -102,10 +105,10 @@ atrib       : IDENT                 { ident_1 = procuraElementoTab(tab, token); 
 ;
 
 com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }
-            | if_simples ELSE { rotulo_mepa_temp=desempilha(&pilha_rot);
+            | if_simples ELSE { rotulo_mepa_aux=desempilha(&pilha_rot);
                                 geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
                                 geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa);
-                                geraCodigo (rotulo_mepa_temp, "NADA"); }
+                                geraCodigo (rotulo_mepa_aux, "NADA"); }
               comando         { geraCodigo (desempilha(&pilha_rot), "NADA"); }
 ;
 
@@ -141,8 +144,11 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
             | IDENT   { ident_2 = procuraElementoTab(tab, token);
-                        geraCodigoArgs (NULL, "CRVL %d,%d", nivellexico, ident_2); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
-            | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token)); }
+                        geraCodigoArgs (NULL, "CRVL %d,%d", nivellexico, ident_2);
+                        empilhaTipoT(&pilha_tipos, T_UNKNOWN); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
+            | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token));
+                        empilhaTipoT(&pilha_tipos, T_INTEGER); }
+
                         // temp_num = malloc (sizeof (int));
                         // *temp_num = atoi(token);
                         // empilha(&pilha_s, temp_num); /* CRCT x */
@@ -205,6 +211,12 @@ int main (int argc, char** argv) {
   yyparse();
 
 #ifdef DEBUG
+
+  // for (i=0; i<25; i++) {
+  //   tipo_aux = *(TipoT *)(desempilha(&pilha_tipos));
+  //   debug_print("[TipoT Tests] i=[%d].tipo_aux = %d\n", i, tipo_aux);
+  // }
+
   imprimeElementosTab(tab); // #DEBUG
 #endif
 

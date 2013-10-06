@@ -8,4 +8,6 @@ typedef enum OperacaoT {
 
 int geraRotulo(char **, int *, PilhaT *);
 
+int empilhaTipoT(PilhaT *, TipoT);
+
 int confereTipo(OperacaoT, TipoT, TipoT);
