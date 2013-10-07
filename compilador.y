@@ -69,16 +69,18 @@ tipo        : INTEGER { atribuiTiposTab(tab, T_INTEGER, num_vars); }
             | IDENT   { atribuiTiposTab(tab, T_UNKNOWN, num_vars); } /* Tipo Desconhecido(ou nao tratado). #TODO Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; insereElementoTab(tab, token); } /* insere última vars na tabela de símbolos */
-            | IDENT                       { num_vars=num_vars + 1; insereElementoTab(tab, token); } /* insere vars na tabela de símbolos */
+lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; insereSimboloTab(tab, token, VS, nivel_lexico); } /* insere última vars na tabela de símbolos */
+            | IDENT                       { num_vars=num_vars + 1; insereSimboloTab(tab, token, VS, nivel_lexico); } /* insere vars na tabela de símbolos */
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-procs_funcs : PROCEDURE IDENT ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES PONTO_E_VIRGULA parte_declara_vars procs_funcs comando_composto procs_funcs   /* #TODO Arrumar regra */
-            | FUNCTION IDENT ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES DOIS_PONTOS tipo PONTO_E_VIRGULA parte_declara_vars procs_funcs comando_composto procs_funcs   /* #TODO Arrumar regra */
+procs_funcs : PROCEDURE IDENT { insereSimboloTab(tab, token, PROC, nivel_lexico); }
+              ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES PONTO_E_VIRGULA parte_declara_vars procs_funcs comando_composto procs_funcs   /* #TODO Arrumar regra */
+            | FUNCTION IDENT { insereSimboloTab(tab, token, FUN, nivel_lexico); }
+              ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES DOIS_PONTOS tipo PONTO_E_VIRGULA parte_declara_vars procs_funcs comando_composto procs_funcs   /* #TODO Arrumar regra */
             |
 ;
 
@@ -100,7 +102,7 @@ com_sem_rot : atrib       /* #TODO Acabar de escrever a regra */
             | com_repetit
 ;
 
-atrib       : IDENT                 { ident_1 = procuraElementoTab(tab, token); }
+atrib       : IDENT                 { ident_1 = procuraSimboloTab(tab, token); }
               ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivel_lexico, ident_1); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
 ;
 
@@ -143,7 +145,7 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 ;
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
-            | IDENT   { ident_2 = procuraElementoTab(tab, token);
+            | IDENT   { ident_2 = procuraSimboloTab(tab, token);
                         geraCodigoArgs (NULL, "CRVL %d,%d", nivel_lexico, ident_2);
                         empilhaTipoT(&pilha_tipos, T_UNKNOWN); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
             | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token));
@@ -195,7 +197,7 @@ int main (int argc, char** argv) {
  * ------------------------------------------------------------------- */
 
   tab = &tabelaSimbDin;
-  tab->num_elementos = 0;
+  tab->num_simbolos = 0;
 
 /* -------------------------------------------------------------------
  *  Inicializa as variaveis de controle
@@ -217,7 +219,9 @@ int main (int argc, char** argv) {
   //   debug_print("[TipoT Tests] i=[%d].tipo_aux = %d\n", i, tipo_aux);
   // }
 
-  imprimeElementosTab(tab); // #DEBUG
+  imprimeTabSimbolos(tab); // #DEBUG
+  atribuiTipoSimbTab(tab, "f1", T_REAL);
+  imprimeTabSimbolos(tab); // #DEBUG
 #endif
 
   return 0;
