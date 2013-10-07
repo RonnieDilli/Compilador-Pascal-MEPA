@@ -32,12 +32,12 @@ int insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int nivel
     exit (-1);
   }
   else {
-    strcpy(tab->simbolo[tab->num_simbolos].id, id);
+    strcpy(tab->simbolo[tab->num_simbolos].id, id);   /* #TODO Fazer verificacao de erros */
     tab->simbolo[tab->num_simbolos].categoria = categoria;
     tab->simbolo[tab->num_simbolos].nivel_lexico = nivel_lexico;
     tab->num_simbolos = tab->num_simbolos + 1;
   }
-  return 0;
+  return tab->num_simbolos-1;
 }
 
 int atribuiTipoSimbTab(TabelaSimbT *tab, char *id, TipoT tipo) {
@@ -69,7 +69,7 @@ int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo, int n) {
   else if (tab->num_simbolos - n >= 0) {
     debug_print("[else if] tab->num_simbolos = %d , n = %d\n", tab->num_simbolos, n);
     for (i = 0; i < n; i++) {
-      tab->simbolo[tab->num_simbolos-i-1].tipo = tipo;
+      tab->simbolo[tab->num_simbolos-i-1].tipo = tipo;    /* #TODO Usar funcao atribuiTipoSimbTab (fica mais modular) */
       debug_print("[for] tab->simbolo[tab->num_simbolos-%d-1].tipo = %d\n", i, tab->simbolo[tab->num_simbolos-i-1].tipo);
     }
     // debug_print("i = [%d]\n", i);
@@ -87,7 +87,7 @@ int imprimeTabSimbolos(TabelaSimbT *tab) {
   else if (tab->num_simbolos > 0) {
     i = (tab->num_simbolos - 1);
     while (i >= 0)  {
-      printf("[%s] tab->simbolo[%2d].id= %-5s  tipo(cod)= %d categoria= %d nivel_lexico= %d\n", __func__, i, tab->simbolo[i].id, tab->simbolo[i].tipo, tab->simbolo[i].categoria, tab->simbolo[i].nivel_lexico);
+      printf("[%s] tab->simbolo[%2d].id= %-5s  tipo(cod)= %d categoria= %d nivel_lexico,deslocamento=(%d,%d)\n", __func__, i, tab->simbolo[i].id, tab->simbolo[i].tipo, tab->simbolo[i].categoria, tab->simbolo[i].nivel_lexico, tab->simbolo[i].deslocamento);
       i--;
     }
   }

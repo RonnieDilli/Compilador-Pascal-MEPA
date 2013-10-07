@@ -12,7 +12,7 @@
 #include "pilha.h"
 #include "aux.h"
 
-int num_vars, ident_1, ident_2, nivel_lexico, cont_rotulo; /* #DEBUG vars: num, *temp_num, i */
+int num_vars, ident_1, ident_2, nivel_lexico, deslocamento, posicao_tabela, cont_rotulo; /* #DEBUG vars: num, *temp_num, i */
 char *rotulo_mepa, *rotulo_mepa_aux;
 
 TabelaSimbT *tab, tabelaSimbDin;
@@ -35,7 +35,7 @@ TipoT tipo_aux;
 
 %%
 
-programa    : { geraCodigo (NULL, "INPP"); nivel_lexico = 0; }
+programa    : { geraCodigo (NULL, "INPP"); nivel_lexico = deslocamento = 0; }
               PROGRAM IDENT ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA bloco PONTO
               { geraCodigo (NULL, "PARA"); }
 ;
@@ -69,8 +69,8 @@ tipo        : INTEGER { atribuiTiposTab(tab, T_INTEGER, num_vars); }
             | IDENT   { atribuiTiposTab(tab, T_UNKNOWN, num_vars); } /* Tipo Desconhecido(ou nao tratado). #TODO Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; insereSimboloTab(tab, token, VS, nivel_lexico); } /* insere última vars na tabela de símbolos */
-            | IDENT                       { num_vars=num_vars + 1; insereSimboloTab(tab, token, VS, nivel_lexico); } /* insere vars na tabela de símbolos */
+lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; posicao_tabela = insereSimboloTab(tab, token, VS, nivel_lexico); tab->simbolo[posicao_tabela].deslocamento = deslocamento++; } /* insere última vars na tabela de símbolos */
+            | IDENT                       { num_vars=num_vars + 1; posicao_tabela = insereSimboloTab(tab, token, VS, nivel_lexico); tab->simbolo[posicao_tabela].deslocamento = deslocamento++; } /* insere vars na tabela de símbolos */
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
@@ -147,7 +147,7 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
             | IDENT   { ident_2 = procuraSimboloTab(tab, token);
                         geraCodigoArgs (NULL, "CRVL %d,%d", nivel_lexico, ident_2);
-                        empilhaTipoT(&pilha_tipos, T_UNKNOWN); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
+                        empilhaTipoT(&pilha_tipos, tab->simbolo[ident_2].tipo); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
             | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token));
                         empilhaTipoT(&pilha_tipos, T_INTEGER); }
 
@@ -171,7 +171,7 @@ fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
                         // debug_print(".linha=%d: num = %d\n", nl, num );
 ;
 
-relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* #TODO Acabar de escrever a regra */
+relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* #TODO Acabar de escrever a regra (e verificar tipos) */
             | MENOR_QUE expr_simples  { geraCodigo (NULL, "CMME"); }
 ;
 
@@ -213,7 +213,7 @@ int main (int argc, char** argv) {
   yyparse();
 
 #ifdef DEBUG
-
+  // int i;
   // for (i=0; i<25; i++) {
   //   tipo_aux = *(TipoT *)(desempilha(&pilha_tipos));
   //   debug_print("[TipoT Tests] i=[%d].tipo_aux = %d\n", i, tipo_aux);
