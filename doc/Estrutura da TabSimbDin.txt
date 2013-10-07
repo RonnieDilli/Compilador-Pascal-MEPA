@@ -1,0 +1,11 @@
+  Variaveis
+*COMUNS:       ID CAT NL
+*ESPECIFICAS:  DESL TIPOT ROT NUM_PARAM LIST_PARAM TIPO_PASSAGEM_PF
+
+  END_RET_FUNC ≈ DESL
+
+ROT     :                           ROT
+PROC    :               LIST_PARAM  ROT NUM_PARAM
+FUN     :   DESL  TIPOT LIST_PARAM  ROT NUM_PARAM
+PF      :   DESL  TIPOT                           TIPO_PASSAGEM_PF
+VS      :   DESL  TIPOT

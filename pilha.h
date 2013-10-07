@@ -1,4 +1,3 @@
-
 /*  Estrutura de dados de Pilha  */
 #define PILHA_TAM 255
 

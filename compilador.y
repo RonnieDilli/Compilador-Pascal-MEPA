@@ -12,7 +12,7 @@
 #include "pilha.h"
 #include "aux.h"
 
-int num_vars, ident_1, ident_2, nivellexico, cont_rotulo; /* #DEBUG vars: num, *temp_num, i */
+int num_vars, ident_1, ident_2, nivel_lexico, cont_rotulo; /* #DEBUG vars: num, *temp_num, i */
 char *rotulo_mepa, *rotulo_mepa_aux;
 
 TabelaSimbT *tab, tabelaSimbDin;
@@ -35,7 +35,7 @@ TipoT tipo_aux;
 
 %%
 
-programa    : { geraCodigo (NULL, "INPP"); nivellexico = 0; }
+programa    : { geraCodigo (NULL, "INPP"); nivel_lexico = 0; }
               PROGRAM IDENT ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA bloco PONTO
               { geraCodigo (NULL, "PARA"); }
 ;
@@ -101,7 +101,7 @@ com_sem_rot : atrib       /* #TODO Acabar de escrever a regra */
 ;
 
 atrib       : IDENT                 { ident_1 = procuraElementoTab(tab, token); }
-              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivellexico, ident_1); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
+              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivel_lexico, ident_1); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
 ;
 
 com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }
@@ -144,7 +144,7 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
             | IDENT   { ident_2 = procuraElementoTab(tab, token);
-                        geraCodigoArgs (NULL, "CRVL %d,%d", nivellexico, ident_2);
+                        geraCodigoArgs (NULL, "CRVL %d,%d", nivel_lexico, ident_2);
                         empilhaTipoT(&pilha_tipos, T_UNKNOWN); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
             | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token));
                         empilhaTipoT(&pilha_tipos, T_INTEGER); }

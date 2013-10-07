@@ -1,7 +1,4 @@
 
-/*  Define tamanho maximo do rotulo  */
-#define ROTULO_TAM 7
-
 typedef enum OperacaoT {
   OP_COMPARACAO, OP_ATRIBUICAO,
 } OperacaoT;
