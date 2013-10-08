@@ -69,19 +69,32 @@ tipo        : INTEGER { atribuiTiposTab(tab, T_INTEGER, num_vars); }
             | IDENT   { atribuiTiposTab(tab, T_UNKNOWN, num_vars); } /* Tipo Desconhecido(ou nao tratado). #TODO Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; posicao_tabela = insereSimboloTab(tab, token, VS, nivel_lexico); tab->simbolo[posicao_tabela].deslocamento = deslocamento++; } /* insere última vars na tabela de símbolos */
-            | IDENT                       { num_vars=num_vars + 1; posicao_tabela = insereSimboloTab(tab, token, VS, nivel_lexico); tab->simbolo[posicao_tabela].deslocamento = deslocamento++; } /* insere vars na tabela de símbolos */
-;
+lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; posicao_tabela = insereSimboloTab(tab, token, VS, nivel_lexico); tab->simbolo[posicao_tabela].deslocamento = deslocamento++; } /* insere ultima var na tabela de simbolos */
+            | IDENT                       { num_vars=num_vars + 1; posicao_tabela = insereSimboloTab(tab, token, VS, nivel_lexico); tab->simbolo[posicao_tabela].deslocamento = deslocamento++; } /* insere vars na tabela de simbolos */
+; /* #TODO Conferir se ID ja nao existe no mesmo nivel lexico antes de inserir na tabela */
 
 lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-procs_funcs : PROCEDURE IDENT { insereSimboloTab(tab, token, PROC, nivel_lexico); }
-              ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES PONTO_E_VIRGULA parte_declara_vars procs_funcs comando_composto procs_funcs   /* #TODO Arrumar regra */
-            | FUNCTION IDENT { insereSimboloTab(tab, token, FUN, nivel_lexico); }
-              ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES DOIS_PONTOS tipo PONTO_E_VIRGULA parte_declara_vars procs_funcs comando_composto procs_funcs   /* #TODO Arrumar regra */
+procs_funcs : PROCEDURE IDENT   { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); geraCodigoArgs (desempilha(&pilha_rot), "ENPR %d", ++nivel_lexico); deslocamento = 0;
+                                  posicao_tabela = insereSimboloTab(tab, token, PROC, nivel_lexico);
+                                  tab->simbolo[posicao_tabela].rotulo = rotulo_mepa; }
+              ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES PONTO_E_VIRGULA bloco_proc_func
+            | FUNCTION IDENT    { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); geraCodigoArgs (desempilha(&pilha_rot), "ENPR %d", ++nivel_lexico); deslocamento = 0;
+                                  posicao_tabela = insereSimboloTab(tab, token, FUN, nivel_lexico);
+                                  tab->simbolo[posicao_tabela].rotulo = rotulo_mepa; }
+              ABRE_PARENTESES parte_declara_vars { tab->simbolo[posicao_tabela].end_retorno = -4 - tab->simbolo[posicao_tabela].num_parametros; } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
+              FECHA_PARENTESES DOIS_PONTOS { num_vars=1; }
+              tipo PONTO_E_VIRGULA bloco_proc_func
             |
+; /* #TODO Arrumar regras */
+
+bloco_proc_func: parte_declara_vars procs_funcs
+              comando_composto  { if (deslocamento) {geraCodigoArgs (NULL, "DMEM %d", deslocamento);}
+                                  posicao_tabela = 99; /* #FIXME Procurar a posicao adequada */
+                                  geraCodigoArgs (NULL, "RTPR %d,%d", nivel_lexico--, tab->simbolo[posicao_tabela].num_parametros); }
+              procs_funcs
 ;
 
 comando_composto: T_BEGIN comandos T_END
@@ -102,8 +115,8 @@ com_sem_rot : atrib       /* #TODO Acabar de escrever a regra */
             | com_repetit
 ;
 
-atrib       : IDENT                 { ident_1 = procuraSimboloTab(tab, token); }
-              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivel_lexico, ident_1); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
+atrib       : IDENT                 { ident_1 = procuraSimboloTab(tab, token); empilhaTipoT(&pilha_tipos, tab->simbolo[ident_1].tipo); }
+              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivel_lexico, ident_1); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin e comparar tipos ao final. */
 ;
 
 com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }

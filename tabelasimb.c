@@ -53,7 +53,7 @@ int atribuiTipoSimbTab(TabelaSimbT *tab, char *id, TipoT tipo) {
       debug_print("[else-if] categoria = %d\n", categoria);
       if (categoria == FUN || categoria == PF || categoria == VS) {
         tab->simbolo[posicao_simbolo].tipo = tipo;
-        debug_print("[else-if-if] tab->simbolo[posicao_simbolo].tipo = %d\n", tab->simbolo[posicao_simbolo].tipo);
+        debug_print("[else-if-if] tab->simbolo[%d].tipo = %d\n", posicao_simbolo, tab->simbolo[posicao_simbolo].tipo);
         return 0;
       }
     }

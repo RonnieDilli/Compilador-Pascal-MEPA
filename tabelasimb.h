@@ -1,6 +1,5 @@
 #define MAX_TAB 100   /* Tamanho maximo de Simbolos na TabSimbDin  */
 #define MAX_ID  255   /* Tamanho maximo da string 'id' na TabSimbDin  */
-#define ROTULO_TAM 7  /* Tamanho maximo do 'char' para o rotulo no MEPA  */
 
 typedef enum CategoriaT {
   FUN, PF, PROC, ROT, VS
@@ -42,7 +41,7 @@ typedef struct SimboloT {
     PassagemT passagem;
     struct {
       int num_parametros;
-      char rotulo[ROTULO_TAM];
+      char *rotulo;
       ListaParamT *lista_param;
     };
   };

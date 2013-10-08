@@ -8,12 +8,14 @@ var m,n :  integer;
       begin
       end
     function f1():integer;
+      var y1, y2, y3 : integer;
       begin
       end
     procedure p2();
       begin
       end
     procedure p3();
+      var z1, z2, z3, z4 : integer;
       begin
       end
 begin
