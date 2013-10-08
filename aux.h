@@ -1,3 +1,4 @@
+#define ROTULO_TAM 7  /* Tamanho maximo do 'char' para o rotulo no MEPA  */
 
 typedef enum OperacaoT {
   OP_COMPARACAO, OP_ATRIBUICAO,

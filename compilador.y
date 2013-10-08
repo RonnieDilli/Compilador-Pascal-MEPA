@@ -12,7 +12,7 @@
 #include "pilha.h"
 #include "aux.h"
 
-int num_vars, ident_1, ident_2, nivel_lexico, deslocamento, posicao_tabela, cont_rotulo; /* #DEBUG vars: num, *temp_num, i */
+int num_vars, nivel_lexico, deslocamento, posicao_tabela, posicao_tabela_aux, cont_rotulo; /* #DEBUG vars: num, *temp_num, i */
 char *rotulo_mepa, *rotulo_mepa_aux;
 
 TabelaSimbT *tab, tabelaSimbDin;
@@ -85,7 +85,7 @@ procs_funcs : PROCEDURE IDENT   { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_
                                   posicao_tabela = insereSimboloTab(tab, token, FUN, nivel_lexico);
                                   tab->simbolo[posicao_tabela].rotulo = rotulo_mepa; }
               ABRE_PARENTESES parte_declara_vars { tab->simbolo[posicao_tabela].end_retorno = -4 - tab->simbolo[posicao_tabela].num_parametros; } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
-              FECHA_PARENTESES DOIS_PONTOS { num_vars=1; }
+              FECHA_PARENTESES DOIS_PONTOS { num_vars=1; }  /* #FIXME Procurar a posicao adequada (usar pilha??) */
               tipo PONTO_E_VIRGULA bloco_proc_func
             |
 ; /* #TODO Arrumar regras */
@@ -115,8 +115,8 @@ com_sem_rot : atrib       /* #TODO Acabar de escrever a regra */
             | com_repetit
 ;
 
-atrib       : IDENT                 { ident_1 = procuraSimboloTab(tab, token); empilhaTipoT(&pilha_tipos, tab->simbolo[ident_1].tipo); }
-              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivel_lexico, ident_1); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin e comparar tipos ao final. */
+atrib       : IDENT                 { posicao_tabela_aux = procuraSimboloTab(tab, token); empilhaTipoT(&pilha_tipos, tab->simbolo[posicao_tabela_aux].tipo); }
+              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivel_lexico, posicao_tabela_aux); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin e comparar tipos ao final. (pilha de identificadore?) */
 ;
 
 com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }
@@ -158,9 +158,9 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 ;
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
-            | IDENT   { ident_2 = procuraSimboloTab(tab, token);
-                        geraCodigoArgs (NULL, "CRVL %d,%d", nivel_lexico, ident_2);
-                        empilhaTipoT(&pilha_tipos, tab->simbolo[ident_2].tipo); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin */
+            | IDENT   { posicao_tabela = procuraSimboloTab(tab, token);
+                        geraCodigoArgs (NULL, "CRVL %d,%d", tab->simbolo[posicao_tabela].nivel_lexico, tab->simbolo[posicao_tabela].deslocamento);
+                        empilhaTipoT(&pilha_tipos, tab->simbolo[posicao_tabela].tipo); }
             | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token));
                         empilhaTipoT(&pilha_tipos, T_INTEGER); }
 
@@ -211,6 +211,8 @@ int main (int argc, char** argv) {
 
   tab = &tabelaSimbDin;
   tab->num_simbolos = 0;
+  inicializaPilha(&pilha_rot);
+  inicializaPilha(&pilha_tipos);
 
 /* -------------------------------------------------------------------
  *  Inicializa as variaveis de controle

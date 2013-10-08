@@ -1,5 +1,4 @@
 #define MAX_TAB 100   /* Tamanho maximo de Simbolos na TabSimbDin  */
-#define MAX_ID  255   /* Tamanho maximo da string 'id' na TabSimbDin  */
 
 typedef enum CategoriaT {
   FUN, PF, PROC, ROT, VS
@@ -26,7 +25,7 @@ typedef struct ListaParamT {
 
 /*  Estrutura dos Simbolos  */
 typedef struct SimboloT {
-  char id[MAX_ID];
+  char id[TAM_TOKEN];
   CategoriaT categoria;
 
   int nivel_lexico;

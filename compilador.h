@@ -13,8 +13,6 @@
 
 #define TAM_TOKEN 16
 
-// #define DEBUG 1
-
 #ifdef DEBUG
 #define debug_print(fmt, ...) \
   fprintf(stderr, "#DEBUG [%s] ", __func__); \
