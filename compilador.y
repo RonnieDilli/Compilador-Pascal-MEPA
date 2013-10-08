@@ -85,13 +85,13 @@ procs_funcs : PROCEDURE IDENT   { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_
                                   posicao_tabela = insereSimboloTab(tab, token, FUN, nivel_lexico);
                                   tab->simbolo[posicao_tabela].rotulo = rotulo_mepa; }
               ABRE_PARENTESES parte_declara_vars { tab->simbolo[posicao_tabela].end_retorno = -4 - tab->simbolo[posicao_tabela].num_parametros; } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
-              FECHA_PARENTESES DOIS_PONTOS { num_vars=1; }  /* #FIXME Procurar a posicao adequada (usar pilha??) */
+              FECHA_PARENTESES DOIS_PONTOS { num_vars=1; }  /*  ^  #FIXME Procurar a posicao adequada (usar pilha??) */
               tipo PONTO_E_VIRGULA bloco_proc_func
             |
 ; /* #TODO Arrumar regras */
 
 bloco_proc_func: parte_declara_vars procs_funcs
-              comando_composto  { if (deslocamento) {geraCodigoArgs (NULL, "DMEM %d", deslocamento);}
+              comando_composto  { if (deslocamento) {geraCodigoArgs (NULL, "DMEM %d", deslocamento); }  /* #FIXME guardar/recuperar 'deslocamento', aka numero de vars locais */
                                   posicao_tabela = 99; /* #FIXME Procurar a posicao adequada */
                                   geraCodigoArgs (NULL, "RTPR %d,%d", nivel_lexico--, tab->simbolo[posicao_tabela].num_parametros); }
               procs_funcs
@@ -136,9 +136,10 @@ com_repetit : WHILE       { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
                             geraCodigo (rotulo_mepa, "NADA"); }
               expressao   { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
                             geraCodigoArgs (NULL, "DSVF %s", rotulo_mepa); }
-              DO comando  { rotulo_mepa=desempilha(&pilha_rot);
-                            geraCodigoArgs (NULL, "DSVS %s", desempilha(&pilha_rot));
-                            geraCodigo (rotulo_mepa, "NADA"); }
+              DO comando  { rotulo_mepa_aux=desempilha(&pilha_rot);
+                            rotulo_mepa=desempilha(&pilha_rot);
+                            geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa);
+                            geraCodigo (rotulo_mepa_aux, "NADA"); }
 ;
 
 expressao   : expr_simples relacao          /* #TODO Acabar de escrever a regra */
