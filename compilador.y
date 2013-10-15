@@ -12,8 +12,9 @@
 #include "pilha.h"
 #include "aux.h"
 
-int num_vars, nivel_lexico, deslocamento, posicao_tabela, posicao_tabela_aux, cont_rotulo; /* #DEBUG vars: num, *temp_num, i */
+int num_vars, nivel_lexico, deslocamento, cont_rotulo; /* #DEBUG vars: num, *temp_num, i */
 char *rotulo_mepa, *rotulo_mepa_aux;
+SimboloT *simb, *simb_aux;
 
 TabelaSimbT *tab, tabelaSimbDin;
 PilhaT pilha_rot, pilha_tipos;
@@ -69,8 +70,8 @@ tipo        : INTEGER { atribuiTiposTab(tab, T_INTEGER, num_vars); }
             | IDENT   { atribuiTiposTab(tab, T_UNKNOWN, num_vars); } /* Tipo Desconhecido(ou nao tratado). #TODO Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; posicao_tabela = insereSimboloTab(tab, token, VS, nivel_lexico); tab->simbolo[posicao_tabela].deslocamento = deslocamento++; } /* insere ultima var na tabela de simbolos */
-            | IDENT                       { num_vars=num_vars + 1; posicao_tabela = insereSimboloTab(tab, token, VS, nivel_lexico); tab->simbolo[posicao_tabela].deslocamento = deslocamento++; } /* insere vars na tabela de simbolos */
+lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; simb = insereSimboloTab(tab, token, VS, nivel_lexico); simb->deslocamento = deslocamento++; } /* insere ultima var na tabela de simbolos */
+            | IDENT                       { num_vars=num_vars + 1; simb = insereSimboloTab(tab, token, VS, nivel_lexico); simb->deslocamento = deslocamento++; } /* insere vars na tabela de simbolos */
 ; /* #TODO Conferir se ID ja nao existe no mesmo nivel lexico antes de inserir na tabela */
 
 lista_idents: lista_idents VIRGULA IDENT
@@ -78,13 +79,13 @@ lista_idents: lista_idents VIRGULA IDENT
 ;
 
 procs_funcs : PROCEDURE IDENT   { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); geraCodigoArgs (desempilha(&pilha_rot), "ENPR %d", ++nivel_lexico); deslocamento = 0;
-                                  posicao_tabela = insereSimboloTab(tab, token, PROC, nivel_lexico);
-                                  tab->simbolo[posicao_tabela].rotulo = rotulo_mepa; }
+                                  simb = insereSimboloTab(tab, token, PROC, nivel_lexico);
+                                  simb->rotulo = rotulo_mepa; }
               ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES PONTO_E_VIRGULA bloco_proc_func
             | FUNCTION IDENT    { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); geraCodigoArgs (desempilha(&pilha_rot), "ENPR %d", ++nivel_lexico); deslocamento = 0;
-                                  posicao_tabela = insereSimboloTab(tab, token, FUN, nivel_lexico);
-                                  tab->simbolo[posicao_tabela].rotulo = rotulo_mepa; }
-              ABRE_PARENTESES parte_declara_vars { tab->simbolo[posicao_tabela].end_retorno = -4 - tab->simbolo[posicao_tabela].num_parametros; } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
+                                  simb = insereSimboloTab(tab, token, FUN, nivel_lexico);
+                                  simb->rotulo = rotulo_mepa; }
+              ABRE_PARENTESES parte_declara_vars { simb->end_retorno = -4 - simb->num_parametros; } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
               FECHA_PARENTESES DOIS_PONTOS { num_vars=1; }  /*  ^  #FIXME Procurar a posicao adequada (usar pilha??) */
               tipo PONTO_E_VIRGULA bloco_proc_func
             |
@@ -92,8 +93,8 @@ procs_funcs : PROCEDURE IDENT   { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_
 
 bloco_proc_func: parte_declara_vars procs_funcs
               comando_composto  { if (deslocamento) {geraCodigoArgs (NULL, "DMEM %d", deslocamento); }  /* #FIXME guardar/recuperar 'deslocamento', aka numero de vars locais */
-                                  posicao_tabela = 99; /* #FIXME Procurar a posicao adequada */
-                                  geraCodigoArgs (NULL, "RTPR %d,%d", nivel_lexico--, tab->simbolo[posicao_tabela].num_parametros); }
+                                  simb = tab->primeiro; /* #FIXME Procurar a posicao adequada */
+                                  geraCodigoArgs (NULL, "RTPR %d,%d", nivel_lexico--, simb->num_parametros); }
               procs_funcs
 ;
 
@@ -115,8 +116,8 @@ com_sem_rot : atrib       /* #TODO Acabar de escrever a regra */
             | com_repetit
 ;
 
-atrib       : IDENT                 { posicao_tabela_aux = procuraSimboloTab(tab, token); empilhaTipoT(&pilha_tipos, tab->simbolo[posicao_tabela_aux].tipo); }
-              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivel_lexico, posicao_tabela_aux); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin e comparar tipos ao final. (pilha de identificadore?) */
+atrib       : IDENT                 { simb_aux = procuraSimboloTab(tab, token); empilhaTipoT(&pilha_tipos, simb_aux->tipo); }
+              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivel_lexico, simb_aux->deslocamento); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin e comparar tipos ao final. (pilha de identificadore?) */
 ;
 
 com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }
@@ -159,9 +160,9 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 ;
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
-            | IDENT   { posicao_tabela = procuraSimboloTab(tab, token);
-                        geraCodigoArgs (NULL, "CRVL %d,%d", tab->simbolo[posicao_tabela].nivel_lexico, tab->simbolo[posicao_tabela].deslocamento);
-                        empilhaTipoT(&pilha_tipos, tab->simbolo[posicao_tabela].tipo); }
+            | IDENT   { simb = procuraSimboloTab(tab, token);
+                        geraCodigoArgs (NULL, "CRVL %d,%d", simb->nivel_lexico, simb->deslocamento);
+                        empilhaTipoT(&pilha_tipos, simb->tipo); }
             | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token));
                         empilhaTipoT(&pilha_tipos, T_INTEGER); }
 
@@ -235,8 +236,8 @@ int main (int argc, char** argv) {
   //   debug_print("[TipoT Tests] i=[%d].tipo_aux = %d\n", i, tipo_aux);
   // }
 
-  imprimeTabSimbolos(tab); // #DEBUG
-  atribuiTipoSimbTab(tab, "f1", T_REAL);
+//  imprimeTabSimbolos(tab); // #DEBUG
+//  atribuiTipoSimbTab(tab, "f1", T_REAL);   // #DEBUG
   imprimeTabSimbolos(tab); // #DEBUG
 #endif
 

@@ -5,55 +5,62 @@
 #include "tabelasimb.h"
 #include "pilha.h"
 
-int procuraSimboloTab(TabelaSimbT *tab, char *id) {
-  int i;
-  // debug_print("tab->num_simbolos = %d\n", tab->num_simbolos);
+SimboloT *procuraSimboloTab(TabelaSimbT *tab, char *id) {
+  SimboloT *simbolo;
   if (tab == NULL) {
-    return -1;
+    exit(-2);
   }
-  else if (tab->num_simbolos > 0) {
-    i = (tab->num_simbolos - 1);
-    while (i >= 0) {
-      // debug_print("tab->simbolo[%d].id = %s\n", i, tab->simbolo[i].id);
-      if (strcmp(tab->simbolo[i].id, id) == 0) {
+  else {
+    simbolo=tab->ultimo;
+    while (simbolo != NULL) {
+      // debug_print("simbolo->id = %s\n", simbolo->id);
+      if (strcmp(simbolo->id, id) == 0) {
         break;
       }
-      i--;
+      simbolo = simbolo->ant;
     }
-    // debug_print("i = [%d]\n", i);
-    return i;
+    return simbolo;
   }
-  return -1;
+  return NULL;
 }
 
-int insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int nivel_lexico) {
-  if (tab->num_simbolos + 1 > MAX_TAB) {
-    fprintf(stderr, "ERRO: *** Tamanho da tabela de simbolos dinamica excedido!\n");
+SimboloT *insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int nivel_lexico) {
+  SimboloT *simbolo;
+  if (tab == NULL ) {
+    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
     exit (-1);
   }
   else {
-    strcpy(tab->simbolo[tab->num_simbolos].id, id);   /* #TODO Fazer verificacao de erros */
-    tab->simbolo[tab->num_simbolos].categoria = categoria;
-    tab->simbolo[tab->num_simbolos].nivel_lexico = nivel_lexico;
-    tab->num_simbolos = tab->num_simbolos + 1;
+    simbolo = malloc (sizeof (SimboloT));
+    strcpy(simbolo->id, id);   /* #TODO Fazer verificacao de erros */
+    simbolo->categoria = categoria;
+    simbolo->nivel_lexico = nivel_lexico;
+
+    tab->num_simbolos++;
+
+    simbolo->ant = tab->ultimo;
+    simbolo->prox = NULL;
+    tab->ultimo = simbolo;
+    if (tab->primeiro == NULL)
+      tab->primeiro = simbolo;
   }
-  return tab->num_simbolos-1;
+  return simbolo;
 }
 
 int atribuiTipoSimbTab(TabelaSimbT *tab, char *id, TipoT tipo) {
-  int posicao_simbolo;
+  SimboloT *simbolo;
   CategoriaT categoria;
   if (tab == NULL) {
-    return -1;
+    exit (-2);
   }
   else {
-    posicao_simbolo = procuraSimboloTab(tab, id);
-    if (posicao_simbolo >= 0) {
-      categoria = tab->simbolo[posicao_simbolo].categoria;
+    simbolo = procuraSimboloTab(tab, id);
+    if (simbolo != NULL) {
+      categoria = simbolo->categoria;
       debug_print("[else-if] categoria = %d\n", categoria);
       if (categoria == FUN || categoria == PF || categoria == VS) {
-        tab->simbolo[posicao_simbolo].tipo = tipo;
-        debug_print("[else-if-if] tab->simbolo[%d].tipo = %d\n", posicao_simbolo, tab->simbolo[posicao_simbolo].tipo);
+        simbolo->tipo = tipo;
+        debug_print("[else-if-if] simbolo->tipo = %d\n", simbolo->tipo);
         return 0;
       }
     }
@@ -62,34 +69,37 @@ int atribuiTipoSimbTab(TabelaSimbT *tab, char *id, TipoT tipo) {
 }
 
 int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo, int n) {
+  SimboloT *simbolo;
   int i;
   if (tab == NULL) {
-    return -1;
+    exit (-2);
   }
-  else if (tab->num_simbolos - n >= 0) {
-    debug_print("[else if] tab->num_simbolos = %d , n = %d\n", tab->num_simbolos, n);
+  else {
+    simbolo = tab->ultimo;
     for (i = 0; i < n; i++) {
-      tab->simbolo[tab->num_simbolos-i-1].tipo = tipo;    /* #TODO Usar funcao atribuiTipoSimbTab (fica mais modular) */
-      debug_print("[for] tab->simbolo[tab->num_simbolos-%d-1].tipo = %d\n", i, tab->simbolo[tab->num_simbolos-i-1].tipo);
+      simbolo->tipo = tipo;    /* #TODO Usar funcao atribuiTipoSimbTab (fica mais modular) */
+      debug_print("[for] simbolo->tipo = %d\n", simbolo->tipo);
     }
-    // debug_print("i = [%d]\n", i);
     return i;
   }
   return -1;
 }
 
 int imprimeTabSimbolos(TabelaSimbT *tab) {
-  int i;
-  printf("[%s] tab->num_simbolos = %d\n", __func__, tab->num_simbolos); // #DEBUG
+  SimboloT *simbolo;
+  int total_simbolos = 0;
   if (tab == NULL) {
     return -1;
   }
-  else if (tab->num_simbolos > 0) {
-    i = (tab->num_simbolos - 1);
-    while (i >= 0)  {
-      printf("[%s] tab->simbolo[%2d].id= %-5s  tipo(cod)= %d categoria= %d nivel_lexico,deslocamento=(%d,%d)\n", __func__, i, tab->simbolo[i].id, tab->simbolo[i].tipo, tab->simbolo[i].categoria, tab->simbolo[i].nivel_lexico, tab->simbolo[i].deslocamento);
-      i--;
+  else {
+    printf("[%s] tab->num_simbolos = %d\n", __func__, tab->num_simbolos); // #DEBUG
+    simbolo = tab->ultimo;
+    while (simbolo != NULL) {
+      printf("[%s] simbolo->id= %-5s  tipo(cod)= %d categoria= %d nivel_lexico,deslocamento=(%d,%d)\n", __func__, simbolo->id, simbolo->tipo, simbolo->categoria, simbolo->nivel_lexico, simbolo->deslocamento);
+      total_simbolos++;
+      simbolo = simbolo->ant;
     }
   }
+  printf("[%s] Total de simbolos = %d\n", __func__, total_simbolos); // #DEBUG
   return 0;
 }

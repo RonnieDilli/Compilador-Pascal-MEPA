@@ -44,19 +44,21 @@ typedef struct SimboloT {
       ListaParamT *lista_param;
     };
   };
+  struct SimboloT *ant, *prox;
 } SimboloT;
 
 /*  Estrutura de dados da Tabela de Simbolos  */
 typedef struct TabelaSimbT {
-  SimboloT simbolo[MAX_TAB];
+  SimboloT *primeiro, *ultimo;
+//  SimboloT simbolo[MAX_TAB];
   int num_simbolos;
 } TabelaSimbT;
 
 /*  Estrutura com variaveis auxiliares  */
 
-int procuraSimboloTab(TabelaSimbT *, char *);
+SimboloT *procuraSimboloTab(TabelaSimbT *, char *);
 
-int insereSimboloTab(TabelaSimbT *, char *, CategoriaT, int);
+SimboloT *insereSimboloTab(TabelaSimbT *, char *, CategoriaT, int);
 
 int atribuiTipoSimbTab(TabelaSimbT *, char *, TipoT);
 
