@@ -7,8 +7,9 @@
 
 SimboloT *procuraSimboloTab(TabelaSimbT *tab, char *id) {
   SimboloT *simbolo;
-  if (tab == NULL) {
-    exit(-2);
+  if (tab == NULL ) {
+    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
+    exit (-2);
   }
   else {
     simbolo=tab->ultimo;
@@ -28,21 +29,31 @@ SimboloT *insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int
   SimboloT *simbolo;
   if (tab == NULL ) {
     fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
-    exit (-1);
+    exit (-2);
   }
   else {
-    simbolo = malloc (sizeof (SimboloT));
-    strcpy(simbolo->id, id);   /* #TODO Fazer verificacao de erros */
-    simbolo->categoria = categoria;
-    simbolo->nivel_lexico = nivel_lexico;
+    if ( procuraSimboloTab(tab, id) != NULL ) {
+      fprintf(stderr, "ERRO: *** Erro sintatico!\n => O identificador '%s' jah foi declarado anteriormente.\n", id);
+      exit (-5);
+    }
+    else {
+      simbolo = malloc (sizeof (SimboloT));
+      if (simbolo == NULL) {
+        fprintf(stderr, "ERRO: *** Nao foi possivel alocar espaco na memoria!\n");
+        exit (-3);
+      }
+      strcpy(simbolo->id, id);
+      simbolo->categoria = categoria;
+      simbolo->nivel_lexico = nivel_lexico;
 
-    tab->num_simbolos++;
+      tab->num_simbolos++;
 
-    simbolo->ant = tab->ultimo;
-    simbolo->prox = NULL;
-    tab->ultimo = simbolo;
-    if (tab->primeiro == NULL)
-      tab->primeiro = simbolo;
+      simbolo->ant = tab->ultimo;
+      simbolo->prox = NULL;
+      tab->ultimo = simbolo;
+      if (tab->primeiro == NULL)
+        tab->primeiro = simbolo;
+    }
   }
   return simbolo;
 }
