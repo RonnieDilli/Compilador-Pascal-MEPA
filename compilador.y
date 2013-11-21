@@ -27,8 +27,8 @@ TipoT tipo_aux;
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
 %token NUMERO SOMA SUBTRACAO MULTIPLICACAO DIVISAO
-%token OR AND MAIOR_QUE MENOR_QUE
-%token IF THEN ELSE WHILE DO GOTO
+%token OR AND MAIOR_QUE MENOR_QUE MAIOR_OU_IGUAL MENOR_OU_IGUAL
+%token IF THEN ELSE WHILE DO GOTO READ WRITE
 %token PROCEDURE FUNCTION INTEGER BOOLEAN
 
 %nonassoc LOWER_THAN_ELSE
@@ -38,7 +38,7 @@ TipoT tipo_aux;
 
 programa    : { geraCodigo (NULL, "INPP"); nivel_lexico = deslocamento = 0; }
               PROGRAM IDENT ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA bloco PONTO
-              { geraCodigo (NULL, "PARA"); }
+              { geraCodigo (NULL, "PARA"); } /* #TODO #FIXME 'DMEM' das variaveis globais! */
 ;
 
 bloco       : parte_declara_vars
@@ -111,13 +111,29 @@ comando     : NUMERO DOIS_PONTOS com_sem_rot  /* #TODO Tratar rotulo_pascal aqui
             |
 ;
 
-com_sem_rot : atrib       /* #TODO Acabar de escrever a regra */
+com_sem_rot : atrib
             | com_condic
             | com_repetit
+            | READ ABRE_PARENTESES lista_param_leit FECHA_PARENTESES
+            | WRITE ABRE_PARENTESES lista_param_impr FECHA_PARENTESES       /* #TODO Acabar de escrever a regra */
+;
+
+lista_param_leit: lista_param_leit VIRGULA IDENT  { geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token);
+                                                    geraCodigoArgs (NULL, "ARMZ %d,%d", simb->nivel_lexico, simb->deslocamento); } /* #FIXME trexo repetido de IDENT ... */
+            | IDENT                               { geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token);
+                                                    geraCodigoArgs (NULL, "ARMZ %d,%d", simb->nivel_lexico, simb->deslocamento); } /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
+;
+
+lista_param_impr: lista_param_impr VIRGULA IDENT  { simb = procuraSimboloTab(tab, token);
+                                                    geraCodigoArgs (NULL, "CRVL %d,%d", simb->nivel_lexico, simb->deslocamento);
+                                                    geraCodigo (NULL, "IMPR"); } /* #FIXME trexo repetido de IDENT ... */
+            | IDENT                               { simb = procuraSimboloTab(tab, token);
+                                                    geraCodigoArgs (NULL, "CRVL %d,%d", simb->nivel_lexico, simb->deslocamento);
+                                                    geraCodigo (NULL, "IMPR"); }  /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
 ;
 
 atrib       : IDENT                 { simb_aux = procuraSimboloTab(tab, token); empilhaTipoT(&pilha_tipos, simb_aux->tipo); }
-              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", nivel_lexico, simb_aux->deslocamento); }  /* #TODO Arrumar codigo: buscar deslocamento na TabSimDin e comparar tipos ao final. (pilha de identificadore?) */
+              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", simb_aux->nivel_lexico, simb_aux->deslocamento); }  /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) */
 ;
 
 com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }
@@ -143,7 +159,7 @@ com_repetit : WHILE       { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
                             geraCodigo (rotulo_mepa_aux, "NADA"); }
 ;
 
-expressao   : expr_simples relacao          /* #TODO Acabar de escrever a regra */
+expressao   : expr_simples relacao          /* #TODO Conferir regra */
             | expr_simples
 ;
 
@@ -186,8 +202,10 @@ fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
                         // debug_print(".linha=%d: num = %d\n", nl, num );
 ;
 
-relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* #TODO Acabar de escrever a regra (e verificar tipos) */
+relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* #TODO Conferir regra (e verificar tipos) */
             | MENOR_QUE expr_simples  { geraCodigo (NULL, "CMME"); }
+            | MAIOR_OU_IGUAL expr_simples  { geraCodigo (NULL, "CMAG"); }
+            | MENOR_OU_IGUAL expr_simples  { geraCodigo (NULL, "CMEG"); }
 ;
 
 %%

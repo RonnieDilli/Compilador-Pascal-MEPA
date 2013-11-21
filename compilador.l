@@ -157,6 +157,18 @@ and { simbolo = simb_and;
   return MENOR_QUE;
 }
 
+\>=  { simbolo = simb_maior_ou_igual;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME(" maior ou igual");
+  return MAIOR_OU_IGUAL;
+}
+
+\<=  { simbolo = simb_menor_ou_igual;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME(" menor ou igual");
+  return MENOR_OU_IGUAL;
+}
+
 if { simbolo = simb_if;
   strncpy (token, yytext, TAM_TOKEN);
   IMPRIME(" if");
@@ -191,6 +203,18 @@ goto { simbolo = simb_go_to;
   strncpy (token, yytext, TAM_TOKEN);
   IMPRIME(" goto");
   return GOTO;
+}
+
+read { simbolo = simb_read;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME(" read");
+  return READ;
+}
+
+write { simbolo = simb_write;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME(" write");
+  return WRITE;
 }
 
 integer { simbolo = simb_integer;
