@@ -27,7 +27,7 @@ TipoT tipo_aux;
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
 %token NUMERO SOMA SUBTRACAO MULTIPLICACAO DIVISAO
-%token OR AND MAIOR_QUE MENOR_QUE MAIOR_OU_IGUAL MENOR_OU_IGUAL
+%token OR AND MAIOR_QUE MENOR_QUE MAIOR_OU_IGUAL MENOR_OU_IGUAL IGUAL
 %token IF THEN ELSE WHILE DO GOTO READ WRITE
 %token PROCEDURE FUNCTION INTEGER BOOLEAN
 
@@ -67,7 +67,7 @@ declara_var : { num_vars=0; }
 
 tipo        : INTEGER { atribuiTiposTab(tab, T_INTEGER, num_vars); }
             | BOOLEAN { atribuiTiposTab(tab, T_BOOLEAN, num_vars); }
-            | IDENT   { atribuiTiposTab(tab, T_UNKNOWN, num_vars); } /* Tipo Desconhecido(ou nao tratado). #TODO Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
+            | IDENT   { atribuiTiposTab(tab, T_UNKNOWN, num_vars); } /* Tipo Desconhecido(ou nao tratado). #Sugestao: Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; simb = insereSimboloTab(tab, token, VS, nivel_lexico); simb->deslocamento = deslocamento++; } /* insere ultima var na tabela de simbolos */
@@ -94,7 +94,7 @@ procs_funcs : PROCEDURE IDENT   { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_
 bloco_proc_func: parte_declara_vars procs_funcs
               comando_composto  { if (deslocamento) {geraCodigoArgs (NULL, "DMEM %d", deslocamento); }  /* #FIXME guardar/recuperar 'deslocamento', aka numero de vars locais */
                                   simb = tab->primeiro; /* #FIXME Procurar a posicao adequada */
-                                  geraCodigoArgs (NULL, "RTPR %d,%d", nivel_lexico--, simb->num_parametros); }
+                                  geraCodigoArgs (NULL, "RTPR %d, %d", nivel_lexico--, simb->num_parametros); }
               procs_funcs
 ;
 
@@ -119,21 +119,21 @@ com_sem_rot : atrib
 ;
 
 lista_param_leit: lista_param_leit VIRGULA IDENT  { geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token);
-                                                    geraCodigoArgs (NULL, "ARMZ %d,%d", simb->nivel_lexico, simb->deslocamento); } /* #FIXME trexo repetido de IDENT ... */
+                                                    geraCodigoArgs (NULL, "ARMZ %d, %d", simb->nivel_lexico, simb->deslocamento); } /* #FIXME trexo repetido de IDENT ... */
             | IDENT                               { geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token);
-                                                    geraCodigoArgs (NULL, "ARMZ %d,%d", simb->nivel_lexico, simb->deslocamento); } /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
+                                                    geraCodigoArgs (NULL, "ARMZ %d, %d", simb->nivel_lexico, simb->deslocamento); } /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
 ;
 
 lista_param_impr: lista_param_impr VIRGULA IDENT  { simb = procuraSimboloTab(tab, token);
-                                                    geraCodigoArgs (NULL, "CRVL %d,%d", simb->nivel_lexico, simb->deslocamento);
+                                                    geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
                                                     geraCodigo (NULL, "IMPR"); } /* #FIXME trexo repetido de IDENT ... */
             | IDENT                               { simb = procuraSimboloTab(tab, token);
-                                                    geraCodigoArgs (NULL, "CRVL %d,%d", simb->nivel_lexico, simb->deslocamento);
+                                                    geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
                                                     geraCodigo (NULL, "IMPR"); }  /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
 ;
 
 atrib       : IDENT                 { simb_aux = procuraSimboloTab(tab, token); empilhaTipoT(&pilha_tipos, simb_aux->tipo); }
-              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d,%d", simb_aux->nivel_lexico, simb_aux->deslocamento); }  /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) */
+              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d, %d", simb_aux->nivel_lexico, simb_aux->deslocamento); }  /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) */
 ;
 
 com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }
@@ -177,7 +177,7 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
             | IDENT   { simb = procuraSimboloTab(tab, token);
-                        geraCodigoArgs (NULL, "CRVL %d,%d", simb->nivel_lexico, simb->deslocamento);
+                        geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
                         empilhaTipoT(&pilha_tipos, simb->tipo); }
             | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token));
                         empilhaTipoT(&pilha_tipos, T_INTEGER); }
@@ -206,6 +206,7 @@ relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* #TODO
             | MENOR_QUE expr_simples  { geraCodigo (NULL, "CMME"); }
             | MAIOR_OU_IGUAL expr_simples  { geraCodigo (NULL, "CMAG"); }
             | MENOR_OU_IGUAL expr_simples  { geraCodigo (NULL, "CMEG"); }
+            | IGUAL expr_simples  { geraCodigo (NULL, "CMIG"); }
 ;
 
 %%

@@ -159,14 +159,20 @@ and { simbolo = simb_and;
 
 \>=  { simbolo = simb_maior_ou_igual;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" maior ou igual");
+  IMPRIME(" maior ou igual que");
   return MAIOR_OU_IGUAL;
 }
 
 \<=  { simbolo = simb_menor_ou_igual;
   strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" menor ou igual");
+  IMPRIME(" menor ou igual que");
   return MENOR_OU_IGUAL;
+}
+
+\=  { simbolo = simb_igual;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME(" igual a");
+  return IGUAL;
 }
 
 if { simbolo = simb_if;
