@@ -60,6 +60,10 @@ SimboloT *procuraSimboloTab(TabelaSimbT *, char *, int);
 
 SimboloT *insereSimboloTab(TabelaSimbT *, char *, CategoriaT, int);
 
+int removeSimboloTab(TabelaSimbT *, SimboloT *);
+
+int removeSimbolosTab(TabelaSimbT *, char *, int);
+
 int atribuiTipoSimbTab(TabelaSimbT *, char *, TipoT);
 
 int atribuiTiposTab(TabelaSimbT *, TipoT, int);

@@ -14,10 +14,8 @@ SimboloT *procuraSimboloTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
   else {
     simbolo=tab->ultimo;
     while (simbolo != NULL) {
-      // debug_print("simbolo->id = %s\n", simbolo->id);
-      if ( (strcmp(simbolo->id, id) == 0) && (simbolo->nivel_lexico == nivel_lexico)) {
+      if ( (strcmp(simbolo->id, id) == 0) && (simbolo->nivel_lexico == nivel_lexico))
         break;
-      }
       simbolo = simbolo->ant;
     }
     return simbolo;
@@ -49,14 +47,76 @@ SimboloT *insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int
 
       tab->num_simbolos++;
 
-      simbolo->ant = tab->ultimo;
-      simbolo->prox = NULL;
-      tab->ultimo = simbolo;
-      if (tab->primeiro == NULL)
+      if (tab->num_simbolos == 1) {
         tab->primeiro = simbolo;
+        simbolo->ant = simbolo->prox = NULL;
+      }
+      else {
+        simbolo->ant  = tab->ultimo;
+        simbolo->ant->prox  = simbolo;
+        simbolo->prox = NULL;
+      }
+      tab->ultimo = simbolo;
     }
   }
   return simbolo;
+}
+
+int removeSimboloTab(TabelaSimbT *tab, SimboloT *simbolo) {
+  if (tab == NULL ) {
+    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
+    exit (-2);
+  }
+  else {
+    if ( simbolo == NULL ) {
+      fprintf(stderr, "ERRO: *** Impossivel remover!\n => O simbolo nao foi encontrado.\n");
+      exit (-6);
+    }
+    else {
+      if (simbolo == tab->primeiro) {
+        tab->primeiro = simbolo->prox;
+      }
+      else
+        simbolo->ant->prox = simbolo->prox;
+      if (simbolo == tab->ultimo) {
+        debug_print("[ultimo1]simbolo->id = %s\n", simbolo->id);
+        tab->ultimo = simbolo->ant;
+      }
+      else
+        simbolo->prox->ant = simbolo->ant;
+
+      tab->num_simbolos--;
+      debug_print("[rm]simbolo->id = %s\n", simbolo->id);
+      free(simbolo);
+    }
+  }
+  return 0;
+}
+
+int removeSimbolosTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
+  SimboloT *simbolo;
+  if (tab == NULL ) {
+    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
+    exit (-2);
+  }
+  else {
+    simbolo = procuraSimboloTab(tab, id, nivel_lexico);
+    if ( simbolo == NULL ) {
+      fprintf(stderr, "ERRO: *** Impossivel remover!\n => O identificador '%s' nao foi encontrado.\n", id);
+      exit (-6);
+    }
+    else {
+      while ( (simbolo=simbolo->prox) != NULL) {
+        if (( simbolo->nivel_lexico == nivel_lexico) && ( simbolo->categoria == VS )) {
+          removeSimboloTab(tab, simbolo);
+        }
+        else
+          if (( simbolo->nivel_lexico < nivel_lexico) || ( simbolo->categoria != VS ))
+            break;
+      }
+    }
+  }
+  return 0;
 }
 
 int atribuiTipoSimbTab(TabelaSimbT *tab, char *id, TipoT tipo) {
@@ -105,11 +165,11 @@ int imprimeTabSimbolos(TabelaSimbT *tab) {
   }
   else {
     printf("[%s] tab->num_simbolos = %d\n", __func__, tab->num_simbolos); // #DEBUG
-    simbolo = tab->ultimo;
+    simbolo = tab->primeiro;
     while (simbolo != NULL) {
       printf("[%s] simbolo->id= %-5s  tipo(cod)= %d categoria= %d nivel_lexico,deslocamento=(%d,%d)\n", __func__, simbolo->id, simbolo->tipo, simbolo->categoria, simbolo->nivel_lexico, simbolo->deslocamento);
       total_simbolos++;
-      simbolo = simbolo->ant;
+      simbolo = simbolo->prox;
     }
   }
   printf("[%s] Total de simbolos = %d\n", __func__, total_simbolos); // #DEBUG

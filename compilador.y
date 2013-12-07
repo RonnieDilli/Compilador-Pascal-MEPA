@@ -232,6 +232,7 @@ int main (int argc, char** argv) {
 
   tab = &tabelaSimbDin;
   tab->num_simbolos = 0;
+  tab->primeiro=tab->ultimo=NULL;
   inicializaPilha(&pilha_rot);
   inicializaPilha(&pilha_tipos);
 
@@ -257,6 +258,10 @@ int main (int argc, char** argv) {
 
 //  imprimeTabSimbolos(tab); // #DEBUG
 //  atribuiTipoSimbTab(tab, "f1", T_REAL);   // #DEBUG
+  imprimeTabSimbolos(tab); // #DEBUG
+
+  removeSimbolosTab(tab, "f1", 1);
+
   imprimeTabSimbolos(tab); // #DEBUG
 #endif
 
