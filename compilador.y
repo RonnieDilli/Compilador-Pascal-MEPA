@@ -118,21 +118,21 @@ com_sem_rot : atrib
             | WRITE ABRE_PARENTESES lista_param_impr FECHA_PARENTESES       /* #TODO Acabar de escrever a regra */
 ;
 
-lista_param_leit: lista_param_leit VIRGULA IDENT  { geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token);
+lista_param_leit: lista_param_leit VIRGULA IDENT  { geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token, nivel_lexico);
                                                     geraCodigoArgs (NULL, "ARMZ %d, %d", simb->nivel_lexico, simb->deslocamento); } /* #FIXME trexo repetido de IDENT ... */
-            | IDENT                               { geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token);
+            | IDENT                               { geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token, nivel_lexico);
                                                     geraCodigoArgs (NULL, "ARMZ %d, %d", simb->nivel_lexico, simb->deslocamento); } /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
 ;
 
-lista_param_impr: lista_param_impr VIRGULA IDENT  { simb = procuraSimboloTab(tab, token);
+lista_param_impr: lista_param_impr VIRGULA IDENT  { simb = procuraSimboloTab(tab, token, nivel_lexico);
                                                     geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
                                                     geraCodigo (NULL, "IMPR"); } /* #FIXME trexo repetido de IDENT ... */
-            | IDENT                               { simb = procuraSimboloTab(tab, token);
+            | IDENT                               { simb = procuraSimboloTab(tab, token, nivel_lexico);
                                                     geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
                                                     geraCodigo (NULL, "IMPR"); }  /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
 ;
 
-atrib       : IDENT                 { simb_aux = procuraSimboloTab(tab, token); empilhaTipoT(&pilha_tipos, simb_aux->tipo); }
+atrib       : IDENT                 { simb_aux = procuraSimboloTab(tab, token, nivel_lexico); empilhaTipoT(&pilha_tipos, simb_aux->tipo); }
               ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d, %d", simb_aux->nivel_lexico, simb_aux->deslocamento); }  /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) */
 ;
 
@@ -176,7 +176,7 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 ;
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
-            | IDENT   { simb = procuraSimboloTab(tab, token);
+            | IDENT   { simb = procuraSimboloTab(tab, token, nivel_lexico);
                         geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
                         empilhaTipoT(&pilha_tipos, simb->tipo); }
             | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token));

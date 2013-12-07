@@ -56,7 +56,7 @@ typedef struct TabelaSimbT {
 
 /*  Estrutura com variaveis auxiliares  */
 
-SimboloT *procuraSimboloTab(TabelaSimbT *, char *);
+SimboloT *procuraSimboloTab(TabelaSimbT *, char *, int);
 
 SimboloT *insereSimboloTab(TabelaSimbT *, char *, CategoriaT, int);
 
