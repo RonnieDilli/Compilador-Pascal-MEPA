@@ -16,11 +16,11 @@ int inicializaPilha(PilhaT *pilha) {
 int empilha(PilhaT *pilha, void *novo_elemento) {
   if (pilha == NULL) {
     fprintf(stderr, "ERRO: *** Impossivel empilhar, a Pilha nao existe!\n");
-    exit(-2);
+    exit(2);
   }
   else if (pilha->topo > PILHA_TAM) {
     fprintf(stderr, "ERRO: *** Tamanho da pilha (%d elementos) excedido!\n", PILHA_TAM);
-    exit (-1);
+    exit(2);
   }
   else {
     pilha->elemento[pilha->topo] = novo_elemento;
@@ -32,7 +32,7 @@ int empilha(PilhaT *pilha, void *novo_elemento) {
 void * desempilha(PilhaT *pilha) {
   if (pilha == NULL) {
     fprintf(stderr, "ERRO: *** Impossivel desempilhar, a Pilha nao existe!\n");
-    exit(-2);
+    exit(2);
   }
   else {
     if (pilha->topo > 0) {
@@ -41,7 +41,7 @@ void * desempilha(PilhaT *pilha) {
     }
     else {
       fprintf(stderr, "ERRO: *** Impossivel desempilhar, a Pilha está vazia!\n");
-      exit(-2);
+      exit(2);
     }
   }
 }

@@ -72,7 +72,7 @@ tipo        : INTEGER { atribuiTiposTab(tab, T_INTEGER, num_vars); }
 
 lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; simb = insereSimboloTab(tab, token, VS, nivel_lexico); simb->deslocamento = deslocamento++; } /* insere ultima var na tabela de simbolos */
             | IDENT                       { num_vars=num_vars + 1; simb = insereSimboloTab(tab, token, VS, nivel_lexico); simb->deslocamento = deslocamento++; } /* insere vars na tabela de simbolos */
-; /* #TODO Conferir se ID ja nao existe no mesmo nivel lexico antes de inserir na tabela */
+;
 
 lista_idents: lista_idents VIRGULA IDENT
             | IDENT
@@ -89,7 +89,7 @@ procs_funcs : PROCEDURE IDENT   { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_
               FECHA_PARENTESES DOIS_PONTOS { num_vars=1; }  /*  ^  #FIXME Procurar a posicao adequada (usar pilha??) */
               tipo PONTO_E_VIRGULA bloco_proc_func
             |
-; /* #TODO Arrumar regras */
+; /* #TODO Arrumar regras suportando 'p();' e 'p;' tanto na declaracao como nas chamadas */
 
 bloco_proc_func: parte_declara_vars procs_funcs
               comando_composto  { if (deslocamento) {geraCodigoArgs (NULL, "DMEM %d", deslocamento); }  /* #FIXME guardar/recuperar 'deslocamento', aka numero de vars locais */

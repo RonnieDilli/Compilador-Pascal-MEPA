@@ -37,7 +37,7 @@ void geraCodigo (char* rot, char* comando) {
 
 int imprimeErro ( char* erro ) {
   fprintf (stderr, "Erro na linha %d - %s\n", nl, erro);
-  exit(-1);
+  exit(11);
 }
 
 /* -------------------------------------------------------------------
@@ -45,5 +45,6 @@ int imprimeErro ( char* erro ) {
  * ------------------------------------------------------------------- */
 
 void yyerror (char *s) {  /*  Arruma erro de compilacao do ProjetoBase  */
-    fprintf (stderr, "%s\n", s);
+    fprintf (stderr, "ERR: *** %s in line: %d\n", s, nl);
+    exit(42);
 }
