@@ -21,7 +21,8 @@ ident [a-zAZ][a-zAZ1-9]*
 
 numero [0-9]+
 
-comentario "(*".*"*)"
+comentario "(*"(.|{pulo_linha})*"*)"
+
 
 %%
 
