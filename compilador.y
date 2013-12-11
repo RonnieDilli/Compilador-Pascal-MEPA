@@ -62,11 +62,9 @@ programa    : { geraCodigo (NULL, "INPP"); nivel_lexico = deslocamento = 0; }
               { geraCodigoDMEM(); geraCodigo (NULL, "PARA"); } /* #TODO #FIXME 'DMEM' das variaveis globais! */
 ;
 
-bloco       : parte_declara_vars
-              { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
-                geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
-              procs_funcs
-              { geraCodigo (desempilha(&pilha_rot), "NADA"); }
+bloco       : parte_declara_vars  { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
+                                    geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
+              procs_funcs         { geraCodigo (desempilha(&pilha_rot), "NADA"); }
               comando_composto
 ;
 
@@ -109,7 +107,8 @@ procs_funcs : PROCEDURE IDENT   { geraCodigoENPR(PROC); }
 ;
 
 bloco_proc_func: parte_declara_vars         { empilhaAMEM(deslocamento); }
-              procs_funcs comando_composto  { geraCodigoDMEM();
+              procs_funcs comando_composto
+              PONTO_E_VIRGULA               { geraCodigoDMEM();
                                               simb = tab->primeiro; /* #FIXME Procurar a posicao adequada */
                                               geraCodigoArgs (NULL, "RTPR %d, %d", nivel_lexico--, simb->num_parametros); }
               procs_funcs
