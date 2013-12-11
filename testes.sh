@@ -6,6 +6,7 @@
 if [ -x 'compilador' ]; then
   TESTADOS=0
   APROVADOS=0
+  COMPILADOS=0
 
   SAVEIFS=$IFS
   IFS=$(echo -en "\n\b")
@@ -16,6 +17,7 @@ if [ -x 'compilador' ]; then
     ./compilador $f/pgma.pas  >/dev/null # 2>/dev/null
     ret=$?
     if [ $ret == 0 ]; then
+      ((COMPILADOS += 1))
       diff $f/MEPA MEPA
       if [ $? == 0 ]; then
         ((APROVADOS += 1))
@@ -28,7 +30,8 @@ if [ -x 'compilador' ]; then
     fi
   done
   IFS=$SAVEIFS
-  echo -e "\n--------------------\n[$APROVADOS/$TESTADOS] Programas compilados corretamente!"
+  echo -e "\n--------------------\n[$COMPILADOS/$TESTADOS] Programas compilados."
+  echo -e "[$(($TESTADOS - $APROVADOS))] Nao geraram o MEPA esperado!"
 else
   echo "Erro: *** compilador nao encontrado!"
   exit 1

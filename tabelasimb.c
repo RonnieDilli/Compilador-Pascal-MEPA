@@ -46,7 +46,8 @@ SimboloT *insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int
   }
   else {
     simbolo = retornaSimboloTab(tab, id, nivel_lexico);
-    if ( simbolo != NULL ) {
+    // if ( simbolo != NULL ) {
+    if ( 0 ) {
       fprintf(stderr, "Warning:\n => O identificador '%s' jah foi declarado anteriormente.\n", id);
       // exit(5);
     }

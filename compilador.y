@@ -105,10 +105,10 @@ lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-procs_funcs : PROCEDURE IDENT   { geraCodigoENPR(PROC); }
+procs_funcs : PROCEDURE IDENT   { geraCodigoENPR(PROC); } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
               vars_proc_func PONTO_E_VIRGULA bloco_proc_func
             | FUNCTION IDENT    { geraCodigoENPR(FUN); }
-              vars_proc_func    { simb->end_retorno = -4 - simb->num_parametros; } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
+              vars_proc_func    { simb->end_retorno = -4 - simb->num_parametros; } /* #TODO Conferir a variavel certa simb->end_retorno ou simb->deslocamento? */
               DOIS_PONTOS       { num_vars=1; }  /*  ^  #FIXME (simb->end_retorno) Procurar a posicao adequada (usar pilha??) */
               tipo PONTO_E_VIRGULA bloco_proc_func
             | 
@@ -174,7 +174,7 @@ atrib_func  : IDENT         { simb_aux = procuraSimboloTab(tab, token, nivel_lex
 exec_ou_atrib: ATRIBUICAO expressao { geraCodigoArgs (NULL, "ARMZ %d, %d", simb_aux->nivel_lexico, simb_aux->deslocamento); }  /* #TODO Comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
             | proc_func             { geraCodigoArgs (NULL, "CHPR %s, %d", simb_aux->rotulo, nivel_lexico); }    /* #TODO Tratar parametros do procedimento: p; p(); p(var1, var2); . */
 ;
-proc_func   : ABRE_PARENTESES lista_idents FECHA_PARENTESES
+proc_func   : ABRE_PARENTESES expressao FECHA_PARENTESES
             | ABRE_PARENTESES FECHA_PARENTESES
             |
 ;
