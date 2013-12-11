@@ -172,14 +172,14 @@ proc_func   : ABRE_PARENTESES lista_idents FECHA_PARENTESES
 ;
 
 com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }
-            | if_simples ELSE { rotulo_mepa_aux=desempilha(&pilha_rot);
-                                geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
-                                geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa);
-                                geraCodigo (rotulo_mepa_aux, "NADA"); }
+            | if_simples ELSE { rotulo_mepa=desempilha(&pilha_rot);
+                                geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa_aux);
+                                geraCodigo (rotulo_mepa, "NADA"); }
               comando         { geraCodigo (desempilha(&pilha_rot), "NADA"); }
 ;
 
-if_simples  : IF            { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); }
+if_simples  : IF            { geraRotulo(&rotulo_mepa_aux, &cont_rotulo, &pilha_rot);
+                              geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); }
               expressao     { geraCodigoArgs (NULL, "DSVF %s", rotulo_mepa); }
               THEN comando
 ;
