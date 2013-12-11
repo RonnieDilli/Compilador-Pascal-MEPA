@@ -55,6 +55,12 @@ function { simbolo  = simb_function;
   return FUNCTION;
 }
 
+label { simbolo  = simb_label;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME("label");
+  return LABEL;
+}
+
 begin { simbolo = simb_begin;
   strncpy (token, yytext, TAM_TOKEN);
   IMPRIME("begin");

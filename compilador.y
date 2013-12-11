@@ -49,7 +49,7 @@ TipoT tipo_aux;
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
 %token NUMERO SOMA SUBTRACAO MULTIPLICACAO DIVISAO
 %token OR AND MAIOR_QUE MENOR_QUE MAIOR_OU_IGUAL MENOR_OU_IGUAL IGUAL
-%token IF THEN ELSE WHILE DO GOTO READ WRITE
+%token IF THEN ELSE WHILE DO GOTO READ WRITE LABEL
 %token PROCEDURE FUNCTION INTEGER BOOLEAN
 
 %nonassoc LOWER_THAN_ELSE
@@ -62,11 +62,18 @@ programa    : { geraCodigo (NULL, "INPP"); nivel_lexico = deslocamento = 0; }
               { geraCodigoDMEM(); geraCodigo (NULL, "PARA"); }
 ;
 
-bloco       : parte_declara_vars  { empilhaAMEM(deslocamento);
+bloco       : rotulos parte_declara_vars  { empilhaAMEM(deslocamento);
                                     geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
                                     geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
               procs_funcs         { geraCodigo (desempilha(&pilha_rot), "NADA"); }
               comando_composto
+;
+
+rotulos     : LABEL lista_nums PONTO_E_VIRGULA
+            |
+;
+lista_nums  : NUMERO VIRGULA lista_nums
+            | NUMERO
 ;
 
 parte_declara_vars:  var
@@ -107,9 +114,9 @@ procs_funcs : PROCEDURE IDENT   { geraCodigoENPR(PROC); }
             | 
 ;
 
-bloco_proc_func: parte_declara_vars         { empilhaAMEM(deslocamento); geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
+bloco_proc_func: rotulos parte_declara_vars { empilhaAMEM(deslocamento); geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
                                               geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
-              procs_funcs { geraCodigo (desempilha(&pilha_rot), "NADA"); } comando_composto
+              procs_funcs                   { geraCodigo (desempilha(&pilha_rot), "NADA"); } comando_composto
               PONTO_E_VIRGULA               { geraCodigoDMEM();
                                               simb = tab->primeiro; /* #FIXME Procurar a posicao adequada */
                                               geraCodigoArgs (NULL, "RTPR %d, %d", nivel_lexico--, simb->num_parametros); }
@@ -148,7 +155,8 @@ com_sem_rot : atrib_func
             | com_condic
             | com_repetit
             | READ ABRE_PARENTESES lista_param_leit FECHA_PARENTESES
-            | WRITE ABRE_PARENTESES lista_param_impr FECHA_PARENTESES   /* #TODO Acabar de escrever a regra, adicionar 'procedures': p; p(); p(var1, var2); */
+            | WRITE ABRE_PARENTESES lista_param_impr FECHA_PARENTESES
+            | GOTO NUMERO /* #TODO Acabar de escrever a regra, adicionar  */
 ;
 
 lista_param_leit: lista_param_leit VIRGULA IDENT  { geraCodigoLEIT(); }
@@ -164,7 +172,7 @@ atrib_func  : IDENT         { simb_aux = procuraSimboloTab(tab, token, nivel_lex
 ;
 
 exec_ou_atrib: ATRIBUICAO expressao { geraCodigoArgs (NULL, "ARMZ %d, %d", simb_aux->nivel_lexico, simb_aux->deslocamento); }  /* #TODO Comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
-            | proc_func             { geraCodigoArgs (NULL, "CHPR %s, %d", simb_aux->rotulo, nivel_lexico); }    /* #TODO Arrumar chamada da funcao, buscar rotulo e nivel lexico. */
+            | proc_func             { geraCodigoArgs (NULL, "CHPR %s, %d", simb_aux->rotulo, nivel_lexico); }    /* #TODO Tratar parametros do procedimento: p; p(); p(var1, var2); . */
 ;
 proc_func   : ABRE_PARENTESES lista_idents FECHA_PARENTESES
             | ABRE_PARENTESES FECHA_PARENTESES
