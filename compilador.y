@@ -107,8 +107,9 @@ procs_funcs : PROCEDURE IDENT   { geraCodigoENPR(PROC); }
             | 
 ;
 
-bloco_proc_func: parte_declara_vars         { empilhaAMEM(deslocamento); }
-              procs_funcs comando_composto
+bloco_proc_func: parte_declara_vars         { empilhaAMEM(deslocamento); geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
+                                              geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
+              procs_funcs { geraCodigo (desempilha(&pilha_rot), "NADA"); } comando_composto
               PONTO_E_VIRGULA               { geraCodigoDMEM();
                                               simb = tab->primeiro; /* #FIXME Procurar a posicao adequada */
                                               geraCodigoArgs (NULL, "RTPR %d, %d", nivel_lexico--, simb->num_parametros); }
@@ -128,12 +129,14 @@ parametros  : VAR lista_id_var DOIS_PONTOS tipo
             | lista_id_var DOIS_PONTOS tipo
 ;
 
-comando_composto: T_BEGIN comandos T_END
+comando_composto: T_BEGIN comandos_ T_END
+;
+comandos_   : comandos
+            |
 ;
 
 comandos    : comandos PONTO_E_VIRGULA comando
             | comando
-            |
 ;
 
 comando     : NUMERO DOIS_PONTOS com_sem_rot  /* #TODO Tratar rotulo_pascal aqui */
@@ -141,16 +144,11 @@ comando     : NUMERO DOIS_PONTOS com_sem_rot  /* #TODO Tratar rotulo_pascal aqui
             | com_sem_rot
 ;
 
-com_sem_rot : atrib
+com_sem_rot : atrib_func
             | com_condic
             | com_repetit
             | READ ABRE_PARENTESES lista_param_leit FECHA_PARENTESES
             | WRITE ABRE_PARENTESES lista_param_impr FECHA_PARENTESES   /* #TODO Acabar de escrever a regra, adicionar 'procedures': p; p(); p(var1, var2); */
-//             | chama_func
-// ;
-//
-// chama_func  : IDENT ABRE_PARENTESES FECHA_PARENTESES PONTO_E_VIRGULA { debug_print("[proc funcs < aqui].linha=%d\n", nl); }
-//             | IDENT PONTO_E_VIRGULA
 ;
 
 lista_param_leit: lista_param_leit VIRGULA IDENT  { geraCodigoLEIT(); }
@@ -161,8 +159,16 @@ lista_param_impr: lista_param_impr VIRGULA IDENT  { geraCodigoIMPR(); }
             | IDENT                               { geraCodigoIMPR(); }  /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
 ;
 
-atrib       : IDENT                 { simb_aux = procuraSimboloTab(tab, token, nivel_lexico); empilhaTipoT(&pilha_tipos, simb_aux->tipo); }
-              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d, %d", simb_aux->nivel_lexico, simb_aux->deslocamento); }  /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
+atrib_func  : IDENT         { simb_aux = procuraSimboloTab(tab, token, nivel_lexico); empilhaTipoT(&pilha_tipos, simb_aux->tipo); }
+              exec_ou_atrib /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
+;
+
+exec_ou_atrib: ATRIBUICAO expressao { geraCodigoArgs (NULL, "ARMZ %d, %d", simb_aux->nivel_lexico, simb_aux->deslocamento); }  /* #TODO Comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
+            | proc_func             { geraCodigoArgs (NULL, "CHPR %s, %d", simb_aux->rotulo, nivel_lexico); }    /* #TODO Arrumar chamada da funcao, buscar rotulo e nivel lexico. */
+;
+proc_func   : ABRE_PARENTESES lista_idents FECHA_PARENTESES
+            | ABRE_PARENTESES FECHA_PARENTESES
+            |
 ;
 
 com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }
@@ -210,25 +216,6 @@ fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
                         empilhaTipoT(&pilha_tipos, simb->tipo); }
             | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token));
                         empilhaTipoT(&pilha_tipos, T_INTEGER); }
-
-                        // temp_num = malloc (sizeof (int));
-                        // *temp_num = atoi(token);
-                        // empilha(&pilha_s, temp_num); /* CRCT x */
-                        // debug_print(".linha=%d: *temp_num = %d\n", nl, *temp_num );
-                        // geraCodigoArgs (NULL, "CRCT %d", *temp_num);
-
-                        // temp_num = malloc (sizeof (int));
-                        // *temp_num = 44;
-                        // empilha(&pilha_s, temp_num); /* CRCT x */
-                        // temp_num = malloc (sizeof (int));
-                        // *temp_num = 66;
-                        // empilha(&pilha_s, temp_num); /* CRCT x */
-                        // num = *(int *)(desempilha(&pilha_s));
-                        // debug_print(".linha=%d: num = %d\n", nl, num );
-                        // num = *(int *)(desempilha(&pilha_s));
-                        // debug_print(".linha=%d: num = %d\n", nl, num );
-                        // num = *(int *)(desempilha(&pilha_s));
-                        // debug_print(".linha=%d: num = %d\n", nl, num );
 ;
 
 relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* #TODO Conferir regra (e verificar tipos) */
