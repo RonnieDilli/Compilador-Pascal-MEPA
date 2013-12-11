@@ -44,7 +44,8 @@ int imprimeErro ( char* erro ) {
  * funcoes auxiliares
  * ------------------------------------------------------------------- */
 
+extern char *yytext;
 void yyerror (char *s) {  /*  Arruma erro de compilacao do ProjetoBase  */
-    fprintf (stderr, "ERR: *** %s in line: %d\n", s, nl);
+    fprintf (stderr, "ERR: *** %s: at or before '%s', in line: %d\n", s, yytext, nl);
     exit(42);
 }

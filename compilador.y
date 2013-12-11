@@ -12,14 +12,35 @@
 #include "pilha.h"
 #include "aux.h"
 
-int num_vars, nivel_lexico, deslocamento, cont_rotulo; /* #DEBUG vars: num, *temp_num, i */
+int num_vars, nivel_lexico, deslocamento, cont_rotulo, *temp_num; /* #DEBUG vars: num, *temp_num, i */
 char *rotulo_mepa, *rotulo_mepa_aux;
 SimboloT *simb, *simb_aux;
 
 TabelaSimbT *tab, tabelaSimbDin;
-PilhaT pilha_rot, pilha_tipos;
+PilhaT pilha_rot, pilha_tipos, pilha_amem_dmem;
 
 TipoT tipo_aux;
+
+/* Empilha numero de vars locais para posterior DMEM */
+#define empilhaAMEM(n_vars) \
+  temp_num = malloc (sizeof (int)); \
+    *temp_num = n_vars; \
+      empilha(&pilha_amem_dmem, temp_num);
+#define geraCodigoDMEM() \
+  num_vars = *(int *)desempilha(&pilha_amem_dmem); \
+    if (num_vars) {geraCodigoArgs (NULL, "DMEM %d", num_vars); }
+#define geraCodigoLEIT() \
+  geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token, nivel_lexico); \
+    geraCodigoArgs (NULL, "ARMZ %d, %d", simb->nivel_lexico, simb->deslocamento);
+#define geraCodigoIMPR() \
+  simb = procuraSimboloTab(tab, token, nivel_lexico); \
+    geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento); \
+      geraCodigo (NULL, "IMPR");
+#define geraCodigoENPR(categoria) \
+  geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); \
+    geraCodigoArgs (desempilha(&pilha_rot), "ENPR %d", ++nivel_lexico); deslocamento = 0; \
+      simb = insereSimboloTab(tab, token, categoria, nivel_lexico); \
+        simb->rotulo = rotulo_mepa;
 
 %}
 
@@ -38,7 +59,7 @@ TipoT tipo_aux;
 
 programa    : { geraCodigo (NULL, "INPP"); nivel_lexico = deslocamento = 0; }
               PROGRAM IDENT ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA bloco PONTO
-              { geraCodigo (NULL, "PARA"); } /* #TODO #FIXME 'DMEM' das variaveis globais! */
+              { geraCodigoDMEM(); geraCodigo (NULL, "PARA"); } /* #TODO #FIXME 'DMEM' das variaveis globais! */
 ;
 
 bloco       : parte_declara_vars
@@ -61,7 +82,7 @@ declara_vars: declara_vars declara_var
 ;
 
 declara_var : { num_vars=0; }
-              lista_id_var DOIS_PONTOS tipo { geraCodigoArgs (NULL, "AMEM %d", num_vars); }
+              lista_id_var DOIS_PONTOS tipo { geraCodigoArgs (NULL, "AMEM %d", num_vars); empilhaAMEM(deslocamento); }
               PONTO_E_VIRGULA
 ;
 
@@ -70,35 +91,31 @@ tipo        : INTEGER { atribuiTiposTab(tab, T_INTEGER, num_vars); }
             | IDENT   { atribuiTiposTab(tab, T_UNKNOWN, num_vars); } /* Tipo Desconhecido(ou nao tratado). #Sugestao: Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
 ;
 
-lista_id_var: lista_id_var VIRGULA IDENT  { num_vars=num_vars + 1; simb = insereSimboloTab(tab, token, VS, nivel_lexico); simb->deslocamento = deslocamento++; } /* insere ultima var na tabela de simbolos */
-            | IDENT                       { num_vars=num_vars + 1; simb = insereSimboloTab(tab, token, VS, nivel_lexico); simb->deslocamento = deslocamento++; } /* insere vars na tabela de simbolos */
+lista_id_var: lista_id_var VIRGULA IDENT  { num_vars++; simb = insereSimboloTab(tab, token, VS, nivel_lexico); simb->deslocamento = deslocamento++; } /* insere ultima var na tabela de simbolos */
+            | IDENT                       { num_vars++; simb = insereSimboloTab(tab, token, VS, nivel_lexico); simb->deslocamento = deslocamento++; } /* insere vars na tabela de simbolos */
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
             | IDENT
 ;
 
-procs_funcs : PROCEDURE IDENT   { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); geraCodigoArgs (desempilha(&pilha_rot), "ENPR %d", ++nivel_lexico); deslocamento = 0;
-                                  simb = insereSimboloTab(tab, token, PROC, nivel_lexico);
-                                  simb->rotulo = rotulo_mepa; }
+procs_funcs : PROCEDURE IDENT   { geraCodigoENPR(PROC); }
               vars_proc_func PONTO_E_VIRGULA bloco_proc_func
-            | FUNCTION IDENT    { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); geraCodigoArgs (desempilha(&pilha_rot), "ENPR %d", ++nivel_lexico); deslocamento = 0;
-                                  simb = insereSimboloTab(tab, token, FUN, nivel_lexico);
-                                  simb->rotulo = rotulo_mepa; }
-              vars_proc_func { simb->end_retorno = -4 - simb->num_parametros; } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
-              DOIS_PONTOS { num_vars=1; }  /*  ^  #FIXME Procurar a posicao adequada (usar pilha??) */
+            | FUNCTION IDENT    { geraCodigoENPR(FUN); }
+              vars_proc_func    { simb->end_retorno = -4 - simb->num_parametros; } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
+              DOIS_PONTOS       { num_vars=1; }  /*  ^  #FIXME (simb->end_retorno) Procurar a posicao adequada (usar pilha??) */
               tipo PONTO_E_VIRGULA bloco_proc_func
-            |
-; /* #TODO Arrumar regras suportando 'p();' e 'p;' tanto na declaracao como nas chamadas */
+            | 
+;
 
-bloco_proc_func: parte_declara_vars procs_funcs
-              comando_composto  { if (deslocamento) {geraCodigoArgs (NULL, "DMEM %d", deslocamento); }  /* #FIXME guardar/recuperar 'deslocamento', aka numero de vars locais */
-                                  simb = tab->primeiro; /* #FIXME Procurar a posicao adequada */
-                                  geraCodigoArgs (NULL, "RTPR %d, %d", nivel_lexico--, simb->num_parametros); }
+bloco_proc_func: parte_declara_vars         { empilhaAMEM(deslocamento); }
+              procs_funcs comando_composto  { geraCodigoDMEM();
+                                              simb = tab->primeiro; /* #FIXME Procurar a posicao adequada */
+                                              geraCodigoArgs (NULL, "RTPR %d, %d", nivel_lexico--, simb->num_parametros); }
               procs_funcs
 ;
 
-vars_proc_func: ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES
+vars_proc_func: ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES /* #TODO Tratar declaracao de parametros, ref e valor */
             |
 ;
 
@@ -119,21 +136,15 @@ com_sem_rot : atrib
             | com_condic
             | com_repetit
             | READ ABRE_PARENTESES lista_param_leit FECHA_PARENTESES
-            | WRITE ABRE_PARENTESES lista_param_impr FECHA_PARENTESES       /* #TODO Acabar de escrever a regra, adicionar 'procedures': p; p(); p(var1, var2); */
+            | WRITE ABRE_PARENTESES lista_param_impr FECHA_PARENTESES   /* #TODO Acabar de escrever a regra, adicionar 'procedures': p; p(); p(var1, var2); */
 ;
 
-lista_param_leit: lista_param_leit VIRGULA IDENT  { geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token, nivel_lexico);
-                                                    geraCodigoArgs (NULL, "ARMZ %d, %d", simb->nivel_lexico, simb->deslocamento); } /* #FIXME trexo repetido de IDENT ... */
-            | IDENT                               { geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token, nivel_lexico);
-                                                    geraCodigoArgs (NULL, "ARMZ %d, %d", simb->nivel_lexico, simb->deslocamento); } /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
+lista_param_leit: lista_param_leit VIRGULA IDENT  { geraCodigoLEIT(); }
+            | IDENT                               { geraCodigoLEIT(); } /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
 ;
 
-lista_param_impr: lista_param_impr VIRGULA IDENT  { simb = procuraSimboloTab(tab, token, nivel_lexico);
-                                                    geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
-                                                    geraCodigo (NULL, "IMPR"); } /* #FIXME trexo repetido de IDENT ... */
-            | IDENT                               { simb = procuraSimboloTab(tab, token, nivel_lexico);
-                                                    geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
-                                                    geraCodigo (NULL, "IMPR"); }  /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
+lista_param_impr: lista_param_impr VIRGULA IDENT  { geraCodigoIMPR(); }
+            | IDENT                               { geraCodigoIMPR(); }  /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
 ;
 
 atrib       : IDENT                 { simb_aux = procuraSimboloTab(tab, token, nivel_lexico); empilhaTipoT(&pilha_tipos, simb_aux->tipo); }
