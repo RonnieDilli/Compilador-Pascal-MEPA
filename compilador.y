@@ -81,12 +81,12 @@ lista_idents: lista_idents VIRGULA IDENT
 procs_funcs : PROCEDURE IDENT   { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); geraCodigoArgs (desempilha(&pilha_rot), "ENPR %d", ++nivel_lexico); deslocamento = 0;
                                   simb = insereSimboloTab(tab, token, PROC, nivel_lexico);
                                   simb->rotulo = rotulo_mepa; }
-              ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES PONTO_E_VIRGULA bloco_proc_func
+              vars_proc_func PONTO_E_VIRGULA bloco_proc_func
             | FUNCTION IDENT    { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); geraCodigoArgs (desempilha(&pilha_rot), "ENPR %d", ++nivel_lexico); deslocamento = 0;
                                   simb = insereSimboloTab(tab, token, FUN, nivel_lexico);
                                   simb->rotulo = rotulo_mepa; }
-              ABRE_PARENTESES parte_declara_vars { simb->end_retorno = -4 - simb->num_parametros; } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
-              FECHA_PARENTESES DOIS_PONTOS { num_vars=1; }  /*  ^  #FIXME Procurar a posicao adequada (usar pilha??) */
+              vars_proc_func { simb->end_retorno = -4 - simb->num_parametros; } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
+              DOIS_PONTOS { num_vars=1; }  /*  ^  #FIXME Procurar a posicao adequada (usar pilha??) */
               tipo PONTO_E_VIRGULA bloco_proc_func
             |
 ; /* #TODO Arrumar regras suportando 'p();' e 'p;' tanto na declaracao como nas chamadas */
@@ -96,6 +96,10 @@ bloco_proc_func: parte_declara_vars procs_funcs
                                   simb = tab->primeiro; /* #FIXME Procurar a posicao adequada */
                                   geraCodigoArgs (NULL, "RTPR %d, %d", nivel_lexico--, simb->num_parametros); }
               procs_funcs
+;
+
+vars_proc_func: ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES
+            |
 ;
 
 comando_composto: T_BEGIN comandos T_END
@@ -115,7 +119,7 @@ com_sem_rot : atrib
             | com_condic
             | com_repetit
             | READ ABRE_PARENTESES lista_param_leit FECHA_PARENTESES
-            | WRITE ABRE_PARENTESES lista_param_impr FECHA_PARENTESES       /* #TODO Acabar de escrever a regra */
+            | WRITE ABRE_PARENTESES lista_param_impr FECHA_PARENTESES       /* #TODO Acabar de escrever a regra, adicionar 'procedures': p; p(); p(var1, var2); */
 ;
 
 lista_param_leit: lista_param_leit VIRGULA IDENT  { geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token, nivel_lexico);
@@ -133,7 +137,7 @@ lista_param_impr: lista_param_impr VIRGULA IDENT  { simb = procuraSimboloTab(tab
 ;
 
 atrib       : IDENT                 { simb_aux = procuraSimboloTab(tab, token, nivel_lexico); empilhaTipoT(&pilha_tipos, simb_aux->tipo); }
-              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d, %d", simb_aux->nivel_lexico, simb_aux->deslocamento); }  /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) */
+              ATRIBUICAO expressao  { geraCodigoArgs (NULL, "ARMZ %d, %d", simb_aux->nivel_lexico, simb_aux->deslocamento); }  /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
 ;
 
 com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }

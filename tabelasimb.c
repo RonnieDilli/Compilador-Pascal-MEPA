@@ -14,7 +14,7 @@ SimboloT *procuraSimboloTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
   else {
     simbolo=tab->ultimo;
     while (simbolo != NULL) {
-      if ( (strcmp(simbolo->id, id) == 0) && (simbolo->nivel_lexico == nivel_lexico))
+      if ( (strcmp(simbolo->id, id) == 0) && (simbolo->nivel_lexico <= nivel_lexico))
         break;
       simbolo = simbolo->ant;
     }

@@ -1,5 +1,3 @@
-#define MAX_TAB 100   /* Tamanho maximo de Simbolos na TabSimbDin  */
-
 typedef enum CategoriaT {
   FUN, PF, PROC, ROT, VS
 } CategoriaT;
@@ -50,7 +48,6 @@ typedef struct SimboloT {
 /*  Estrutura de dados da Tabela de Simbolos  */
 typedef struct TabelaSimbT {
   SimboloT *primeiro, *ultimo;
-//  SimboloT simbolo[MAX_TAB];
   int num_simbolos;
 } TabelaSimbT;
 
