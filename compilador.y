@@ -106,9 +106,9 @@ lista_idents: lista_idents VIRGULA IDENT
 ;
 
 procs_funcs : PROCEDURE IDENT   { geraCodigoENPR(PROC); } /* #TODO Tratar parametros e seus tipos, num_parametros, etc */
-              vars_proc_func PONTO_E_VIRGULA bloco_proc_func
+              params_proc_func PONTO_E_VIRGULA bloco_proc_func
             | FUNCTION IDENT    { geraCodigoENPR(FUN); }
-              vars_proc_func    { simb->end_retorno = -4 - simb->num_parametros; } /* #TODO Conferir a variavel certa simb->end_retorno ou simb->deslocamento? */
+              params_proc_func    { simb->end_retorno = -4 - simb->num_parametros; } /* #TODO Conferir o deslocamento correto. */
               DOIS_PONTOS       { num_vars=1; }  /*  ^  #FIXME (simb->end_retorno) Procurar a posicao adequada (usar pilha??) */
               tipo PONTO_E_VIRGULA bloco_proc_func
             | 
@@ -118,22 +118,22 @@ bloco_proc_func: rotulos parte_declara_vars { empilhaAMEM(deslocamento); geraRot
                                               geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
               procs_funcs                   { geraCodigo (desempilha(&pilha_rot), "NADA"); } comando_composto
               PONTO_E_VIRGULA               { geraCodigoDMEM();
-                                              simb = tab->primeiro; /* #FIXME Procurar a posicao adequada */
-                                              geraCodigoArgs (NULL, "RTPR %d, %d", nivel_lexico--, simb->num_parametros); }
+                                              simb = tab->primeiro; /* #FIXME Procurar a posicao adequada, usar pilha de simbolos para o encadeamento das func/proc . */
+                                              geraCodigoArgs (NULL, "RTPR %d, %d", nivel_lexico--, simb->nivel_lexico); }  /* #TODO Verificar se a ordem e valor dos parametros esta correta */
               procs_funcs
 ;
 
-vars_proc_func: ABRE_PARENTESES lista_param FECHA_PARENTESES /* #TODO Tratar declaracao de parametros, ref e valor */
+params_proc_func: ABRE_PARENTESES { num_vars = 0; deslocamento = -4; } lista_param { /* #TODO voltar configurando deslocamentos -4, -5, etc */deslocamento = 0; } FECHA_PARENTESES /* #TODO Tratar declaracao de parametros, ref e valor */
             |
 ;
 
 lista_param : lista_param PONTO_E_VIRGULA parametros 
-            | parametros
+            | parametros { num_vars++; }
             |
 ;
 
-parametros  : VAR lista_id_var DOIS_PONTOS tipo
-            | lista_id_var DOIS_PONTOS tipo
+parametros  : VAR lista_id_var DOIS_PONTOS tipo { deslocamento--; } /* #TODO refazer lista_id_var para que adicione parametros na lista de parametros da funcao/proc. */
+            | lista_id_var DOIS_PONTOS tipo     { deslocamento--; } /* #TODO conferir ordem dos parametros na pilha, -4, -5 vs -5, -4, -3, etc. */
 ;
 
 comando_composto: T_BEGIN comandos_ T_END
@@ -156,7 +156,7 @@ com_sem_rot : atrib_func
             | com_repetit
             | READ ABRE_PARENTESES lista_param_leit FECHA_PARENTESES
             | WRITE ABRE_PARENTESES lista_param_impr FECHA_PARENTESES
-            | GOTO NUMERO /* #TODO Acabar de escrever a regra, adicionar  */
+            | GOTO NUMERO /* #TODO Acabar de escrever a regra */
 ;
 
 lista_param_leit: lista_param_leit VIRGULA IDENT  { geraCodigoLEIT(); }
@@ -218,7 +218,7 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
             | fator
 ;
 
-fator       : ABRE_PARENTESES expressao FECHA_PARENTESES
+fator       : ABRE_PARENTESES expressao FECHA_PARENTESES                /* #TODO Adicionar f(n); */
             | IDENT   { simb = procuraSimboloTab(tab, token, nivel_lexico);
                         geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
                         empilhaTipoT(&pilha_tipos, simb->tipo); }
