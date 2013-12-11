@@ -139,7 +139,6 @@ comandos    : comandos PONTO_E_VIRGULA comando
 comando     : NUMERO DOIS_PONTOS com_sem_rot  /* #TODO Tratar rotulo_pascal aqui */
             | comando_composto
             | com_sem_rot
-            // | IDENT { debug_print("[proc funcs < aqui]"); }
 ;
 
 com_sem_rot : atrib
@@ -147,6 +146,11 @@ com_sem_rot : atrib
             | com_repetit
             | READ ABRE_PARENTESES lista_param_leit FECHA_PARENTESES
             | WRITE ABRE_PARENTESES lista_param_impr FECHA_PARENTESES   /* #TODO Acabar de escrever a regra, adicionar 'procedures': p; p(); p(var1, var2); */
+//             | chama_func
+// ;
+//
+// chama_func  : IDENT ABRE_PARENTESES FECHA_PARENTESES PONTO_E_VIRGULA { debug_print("[proc funcs < aqui].linha=%d\n", nl); }
+//             | IDENT PONTO_E_VIRGULA
 ;
 
 lista_param_leit: lista_param_leit VIRGULA IDENT  { geraCodigoLEIT(); }
@@ -285,9 +289,9 @@ int main (int argc, char** argv) {
 //  atribuiTipoSimbTab(tab, "f1", T_REAL);   // #DEBUG
   imprimeTabSimbolos(tab); // #DEBUG
 
-  removeSimbolosTab(tab, "f1", 1);
+  // removeSimbolosTab(tab, "f1", 1);
 
-  imprimeTabSimbolos(tab); // #DEBUG
+  // imprimeTabSimbolos(tab); // #DEBUG
 #endif
 
   return 0;

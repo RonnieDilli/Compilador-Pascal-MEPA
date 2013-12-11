@@ -55,6 +55,8 @@ typedef struct TabelaSimbT {
 
 SimboloT *procuraSimboloTab(TabelaSimbT *, char *, int);
 
+SimboloT *retornaSimboloTab(TabelaSimbT *, char *, int );
+
 SimboloT *insereSimboloTab(TabelaSimbT *, char *, CategoriaT, int);
 
 int removeSimboloTab(TabelaSimbT *, SimboloT *);

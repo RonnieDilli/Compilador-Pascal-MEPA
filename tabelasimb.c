@@ -7,6 +7,19 @@
 
 SimboloT *procuraSimboloTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
   SimboloT *simbolo;
+  simbolo = retornaSimboloTab(tab, id, nivel_lexico);
+
+  if ( simbolo == NULL ) {
+    fprintf(stderr, "ERRO: *** Erro sintatico!\n => O identificador '%s' nao foi encontrado.\n", id);
+    exit(10);
+  }
+  else {
+    return simbolo;
+  }
+}
+
+SimboloT *retornaSimboloTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
+  SimboloT *simbolo;
   if (tab == NULL ) {
     fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
     exit(2);
@@ -14,10 +27,12 @@ SimboloT *procuraSimboloTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
   else {
     simbolo=tab->ultimo;
     while (simbolo != NULL) {
-      if ( (strcmp(simbolo->id, id) == 0) && (simbolo->nivel_lexico <= nivel_lexico))
+      debug_print("[while]simbolo->id = %s  -  id = %s\n", simbolo->id, id);
+      if ( (strcmp(simbolo->id, id) == 0)  )// && (simbolo->nivel_lexico <= nivel_lexico))
         break;
       simbolo = simbolo->ant;
     }
+    debug_print("[end] return %d  -  id = %s\n", simbolo, id);
     return simbolo;
   }
   return NULL;
@@ -30,10 +45,10 @@ SimboloT *insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int
     exit(2);
   }
   else {
-    simbolo = procuraSimboloTab(tab, id, nivel_lexico);
+    simbolo = retornaSimboloTab(tab, id, nivel_lexico);
     if ( simbolo != NULL ) {
-      fprintf(stderr, "ERRO: *** Erro sintatico!\n => O identificador '%s' jah foi declarado anteriormente.\n", id);
-      exit(5);
+      fprintf(stderr, "Warning:\n => O identificador '%s' jah foi declarado anteriormente.\n", id);
+      // exit(5);
     }
     else {
       simbolo = malloc (sizeof (SimboloT));
@@ -101,7 +116,7 @@ int removeSimbolosTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
     exit(2);
   }
   else {
-    simbolo = procuraSimboloTab(tab, id, nivel_lexico);
+    simbolo = retornaSimboloTab(tab, id, nivel_lexico);
     if ( simbolo == NULL ) {
       fprintf(stderr, "ERRO: *** Impossivel remover!\n => O identificador '%s' nao foi encontrado.\n", id);
       exit(6);
@@ -129,7 +144,7 @@ int atribuiTipoSimbTab(TabelaSimbT *tab, char *id, TipoT tipo) {
     exit(2);
   }
   else {
-    simbolo = procuraSimboloTab(tab, id, nivel_lexico);
+    simbolo = retornaSimboloTab(tab, id, nivel_lexico);
     if (simbolo != NULL) {
       categoria = simbolo->categoria;
       debug_print("[else-if] categoria = %d\n", categoria);
@@ -138,6 +153,10 @@ int atribuiTipoSimbTab(TabelaSimbT *tab, char *id, TipoT tipo) {
         debug_print("[else-if-if] simbolo->tipo = %d\n", simbolo->tipo);
         return 0;
       }
+    }
+    else {
+      fprintf(stderr, "ERRO: *** Impossivel atrubuir tipo!\n => O identificador '%s' nao foi encontrado.\n", id);
+      exit (7);
     }
   }
   return -1;

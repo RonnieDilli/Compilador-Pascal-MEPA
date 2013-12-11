@@ -6,18 +6,18 @@ var m,n :  integer;
 
     procedure p1();
       begin
-      end
+      end;
     function f1():integer;
       var y1, y2, y3 : integer;
       begin
-      end
+      end;
     procedure p2();
       begin
-      end
+      end;
     procedure p3();
       var z1, z2, z3, z4 : integer;
       begin
-      end
+      end;
 begin
   n:=25+37+55-38*3-9+(90-15+(25*35))-2;
 
