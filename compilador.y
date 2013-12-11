@@ -115,8 +115,17 @@ bloco_proc_func: parte_declara_vars         { empilhaAMEM(deslocamento); }
               procs_funcs
 ;
 
-vars_proc_func: ABRE_PARENTESES parte_declara_vars FECHA_PARENTESES /* #TODO Tratar declaracao de parametros, ref e valor */
+vars_proc_func: ABRE_PARENTESES lista_param FECHA_PARENTESES /* #TODO Tratar declaracao de parametros, ref e valor */
             |
+;
+
+lista_param : lista_param PONTO_E_VIRGULA parametros 
+            | parametros
+            |
+;
+
+parametros  : VAR lista_id_var DOIS_PONTOS tipo
+            | lista_id_var DOIS_PONTOS tipo
 ;
 
 comando_composto: T_BEGIN comandos T_END
@@ -124,12 +133,13 @@ comando_composto: T_BEGIN comandos T_END
 
 comandos    : comandos PONTO_E_VIRGULA comando
             | comando
+            |
 ;
 
 comando     : NUMERO DOIS_PONTOS com_sem_rot  /* #TODO Tratar rotulo_pascal aqui */
             | comando_composto
             | com_sem_rot
-            |
+            // | IDENT { debug_print("[proc funcs < aqui]"); }
 ;
 
 com_sem_rot : atrib
