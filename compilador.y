@@ -59,10 +59,11 @@ TipoT tipo_aux;
 
 programa    : { geraCodigo (NULL, "INPP"); nivel_lexico = deslocamento = 0; }
               PROGRAM IDENT ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA bloco PONTO
-              { geraCodigoDMEM(); geraCodigo (NULL, "PARA"); } /* #TODO #FIXME 'DMEM' das variaveis globais! */
+              { geraCodigoDMEM(); geraCodigo (NULL, "PARA"); }
 ;
 
-bloco       : parte_declara_vars  { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
+bloco       : parte_declara_vars  { empilhaAMEM(deslocamento);
+                                    geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
                                     geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
               procs_funcs         { geraCodigo (desempilha(&pilha_rot), "NADA"); }
               comando_composto
@@ -80,7 +81,7 @@ declara_vars: declara_vars declara_var
 ;
 
 declara_var : { num_vars=0; }
-              lista_id_var DOIS_PONTOS tipo { geraCodigoArgs (NULL, "AMEM %d", num_vars); empilhaAMEM(deslocamento); }
+              lista_id_var DOIS_PONTOS tipo { geraCodigoArgs (NULL, "AMEM %d", num_vars); }
               PONTO_E_VIRGULA
 ;
 
