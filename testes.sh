@@ -1,37 +1,68 @@
 #!/usr/bin/env bash
 
 ## Tetador do Compilador Pascal->MEPA por Ronnie Dilli
-## Version 0.1 - 2013/12/10
+## Version 0.4 - 2013/12/11
+## Sob licensa GPL
 
 if [ -x 'compilador' ]; then
-  TESTADOS=0
+  EX_TESTADOS=0
   APROVADOS=0
   COMPILADOS=0
 
   SAVEIFS=$IFS
   IFS=$(echo -en "\n\b")
-  for f in PgmasTeste/E*
+  shopt -s nullglob
+  for f in PgmasTeste/Exemplo*
   do
-    ((TESTADOS += 1))
+    ((EX_TESTADOS += 1))
     echo "----"
     ./compilador $f/pgma.pas  >/dev/null # 2>/dev/null
-    ret=$?
-    if [ $ret == 0 ]; then
+    retorno=$?
+    if [ $retorno == 0 ]; then
       ((COMPILADOS += 1))
       diff $f/MEPA MEPA
       if [ $? == 0 ]; then
         ((APROVADOS += 1))
-        echo ">> [OK] $f <<"
+        echo ">> [OK]: $f <<"
       else
         echo "^^ Diferencas entre '$f/MEPA' e 'MEPA'  ^^"
       fi
     else
-      echo "Erro ($ret) ao compilar o arquivo: '$f'"
+      echo "Erro ($retorno) ao compilar o arquivo: '$f'"
+    fi
+  done
+  if [ $EX_TESTADOS != 0 ]; then
+    echo -e "\n--------------------\n[$COMPILADOS/$EX_TESTADOS] Programas compilados."
+    echo -e "[$(($EX_TESTADOS - $APROVADOS))] Nao geraram o MEPA esperado!"
+  fi
+
+  C_EX_TESTADOS=0
+  ERROS_SINTATICOS=0
+  ERROS_ESPERADOS=0
+  for f in PgmasTeste/ContraExemplo*
+  do
+    ((C_EX_TESTADOS += 1))
+    echo "----"
+    ./compilador $f/pgma.pas  >/dev/null # 2>/dev/null
+    retorno=$?
+    if [ $retorno != 0 ]; then
+      ((ERROS_SINTATICOS += 1))
+      read ERRO_ESPERADO < $f/ERRO_ESPERADO
+      if [ $ERRO_ESPERADO = $retorno ]; then
+        ((ERROS_ESPERADOS += 1))
+        echo ">> [OK]: O 'erro esperado' ($retorno) foi retornado. <<"
+      else
+        echo "Erro retornado ($f/ERRO_ESPERADO) diferente do retorno ($retorno)!"
+      fi
+    else
+      echo "Arquivo compilado com sucesso: '$f'"
     fi
   done
   IFS=$SAVEIFS
-  echo -e "\n--------------------\n[$COMPILADOS/$TESTADOS] Programas compilados."
-  echo -e "[$(($TESTADOS - $APROVADOS))] Nao geraram o MEPA esperado!"
+  if [ $C_EX_TESTADOS != 0 ]; then
+    echo -e "\n--------------------\n[$ERROS_SINTATICOS/$C_EX_TESTADOS] Contra Exemplos tiveram erro sintatico detectado."
+    echo -e "[$(($C_EX_TESTADOS - $ERROS_ESPERADOS))] Nao geraram o ERRO esperado!"
+  fi
 else
   echo "Erro: *** compilador nao encontrado!"
   exit 1
