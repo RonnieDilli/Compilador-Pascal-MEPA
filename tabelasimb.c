@@ -70,6 +70,7 @@ SimboloT *insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int
         simbolo->ant  = tab->ultimo;
         simbolo->ant->prox  = simbolo;
         simbolo->prox = NULL;
+        simbolo->tipo = T_UNSET;
       }
       tab->ultimo = simbolo;
     }
@@ -137,7 +138,7 @@ int removeSimbolosTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
   return 0;
 }
 
-int atribuiTipoSimbTab(TabelaSimbT *tab, char *id, TipoT tipo) {
+int atribuiTipoSimbTab(TabelaSimbT *tab, TipoT tipo, char *id) {
   SimboloT *simbolo;
   CategoriaT categoria;
   if (tab == NULL) {
@@ -162,21 +163,27 @@ int atribuiTipoSimbTab(TabelaSimbT *tab, char *id, TipoT tipo) {
   return -1;
 }
 
-int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo, int n) {
+int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo) {
   SimboloT *simbolo;
   int i;
   if (tab == NULL) {
     exit(2);
   }
   else {
+    i=0;
     simbolo = tab->ultimo;
-    for (i = 0; i < n; i++) {
-      simbolo->tipo = tipo;    /* #TODO Usar funcao atribuiTipoSimbTab (fica mais modular) */
-      debug_print("[for] simbolo->tipo = %d\n", simbolo->tipo);
+    while (simbolo->tipo == T_UNSET) {
+      if (simbolo->categoria == VS) {
+        debug_print("[for] tipo = %d\n", tipo);
+        i++;
+      }
+      else {
+        break;
+      }
+      simbolo = simbolo->ant;
     }
     return i;
   }
-  return -1;
 }
 
 int imprimeTabSimbolos(TabelaSimbT *tab) {
