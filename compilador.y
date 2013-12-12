@@ -19,6 +19,7 @@ SimboloT *simb, *simb_aux;
 TabelaSimbT *tab, tabelaSimbDin;
 PilhaT pilha_rot, pilha_tipos, pilha_amem_dmem, pilha_simbs;
 
+PassagemT passagem;
 TipoT tipo_aux;
 
 /* Empilha numero de vars locais para posterior DMEM */
@@ -29,19 +30,31 @@ TipoT tipo_aux;
 #define geraCodigoDMEM() \
   num_vars = *(int *)desempilha(&pilha_amem_dmem); \
     if (num_vars) {geraCodigoArgs (NULL, "DMEM %d", num_vars); }
+
+#define geraCodigoARMZI(simbolo) \
+  if (simbolo->passagem == T_VALOR) { geraCodigoArgs (NULL, "ARMZ %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); } \
+    else { geraCodigoArgs (NULL, "ARMI %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); }
+#define geraCodigoCRVLI(simbolo) \
+  debug_print("[geraCodigoCRVLI] simbolo->id = '%s', simbolo->passagem=%d, passagem=%d\n", simbolo->id, simbolo->passagem, passagem); \
+  if (passagem == T_REFERENCIA) { if (simbolo->passagem == T_REFERENCIA) { geraCodigoArgs (NULL, "CREN %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); } \ //#TODO Arrumar logica Ifs
+    else { geraCodigoArgs (NULL, "CRVL %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); } \
+      } else if (simbolo->passagem == T_VALOR) { geraCodigoArgs (NULL, "CRVL %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); } \
+          else { geraCodigoArgs (NULL, "CRVI %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); }
+
 #define geraCodigoLEIT() \
   geraCodigo (NULL, "LEIT"); simb = procuraSimboloTab(tab, token, nivel_lexico); \
-    geraCodigoArgs (NULL, "ARMZ %d, %d", simb->nivel_lexico, simb->deslocamento);
+    geraCodigoARMZI(simb);
 #define geraCodigoIMPR() \
   simb = procuraSimboloTab(tab, token, nivel_lexico); \
-    geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento); \
-      geraCodigo (NULL, "IMPR");
+    geraCodigoCRVLI(simb); \
+        geraCodigo (NULL, "IMPR");
 #define geraCodigoENPR(categoria) \
   geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot); \
     geraCodigoArgs (desempilha(&pilha_rot), "ENPR %d", ++nivel_lexico); \
       simb = insereSimboloTab(tab, token, categoria, nivel_lexico); \
         simb->rotulo = rotulo_mepa; \
-          empilha(&pilha_simbs, simb);
+          empilha(&pilha_simbs, simb); \
+            simb->num_parametros=num_vars = 0;
 #define desempilhaEImprime(pilha) \
   while ((simb = desempilhaMesmoNULL(pilha))) { debug_print("[desempilhaEImprime] simb->id = '%s'\n", simb->id); }
 
@@ -61,7 +74,7 @@ TipoT tipo_aux;
 %%
 
 programa    :               { geraCodigo (NULL, "INPP"); nivel_lexico = deslocamento = 0; }
-              PROGRAM IDENT { simb = insereSimboloTab(tab, token, PROG, nivel_lexico); empilha(&pilha_simbs, simb); }
+              PROGRAM IDENT { simb = insereSimboloTab(tab, token, PROG, 0); empilha(&pilha_simbs, simb); }
               ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA bloco
               PONTO         { geraCodigoDMEM(); geraCodigo (NULL, "PARA"); }
 ;
@@ -80,10 +93,11 @@ lista_nums  : NUMERO VIRGULA lista_nums
             | NUMERO
 ;
 
-parte_declara_vars:  var
+parte_declara_vars: var
 ;
 
-var         : VAR declara_vars
+var         : VAR         { deslocamento=0; }
+              declara_vars
             |
 ;
 
@@ -91,7 +105,7 @@ declara_vars: declara_vars { num_vars=0; } declara_var
             | { num_vars=0; }declara_var
 ;
 
-declara_var : lista_id_var DOIS_PONTOS tipo { geraCodigoArgs (NULL, "AMEM %d", num_vars); }
+declara_var : lista_id_var DOIS_PONTOS tipo { geraCodigoArgs (NULL, "AMEM %d", num_vars); atrubuiPassagemTab(tab, T_VALOR, num_vars); }
               PONTO_E_VIRGULA
 ;
 
@@ -117,8 +131,7 @@ procs_funcs : PROCEDURE IDENT   { geraCodigoENPR(PROC); } /* #TODO Tratar parame
             | 
 ;
 
-bloco_proc_func: rotulos                        { deslocamento=0; }
-              parte_declara_vars                { empilhaAMEM(deslocamento); geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
+bloco_proc_func: rotulos parte_declara_vars     { empilhaAMEM(deslocamento); geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
                                                   geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
               procs_funcs                       { geraCodigo (desempilha(&pilha_rot), "NADA"); }
               comando_composto PONTO_E_VIRGULA  { geraCodigoDMEM(); simb = desempilha(&pilha_simbs); removeSimbolosTab(tab, simb->id, simb->nivel_lexico);
@@ -126,22 +139,25 @@ bloco_proc_func: rotulos                        { deslocamento=0; }
               procs_funcs
 ;
 
-params_proc_func: ABRE_PARENTESES { simb->num_parametros=0; deslocamento = -4; }
-              lista_dec_param         { deslocamentosParamsTab(tab, simb->num_parametros); deslocamento = 0; /* #TODO voltar configurando deslocamentos -4, -5, etc */ }
+params_proc_func: ABRE_PARENTESES
+              lista_dec_param         { deslocamentosParamsTab(tab, simb->num_parametros); } /* #TODO voltar configurando deslocamentos -4, -5, etc */
               FECHA_PARENTESES    /* #TODO Tratar declaracao de parametros, ref e valor */
             |
 ;
 
-lista_dec_param : lista_dec_param PONTO_E_VIRGULA parametros_dec
-            | parametros_dec
+lista_dec_param : lista_dec_param PONTO_E_VIRGULA
+              { num_vars=0; } parametros_dec
+            | { num_vars=0; } parametros_dec
             |
 ;
 
-parametros_dec  : VAR lista_id_par DOIS_PONTOS tipo { debug_print("[VAR param] %s", "\n");  } /* #TODO Adicionar parametros na lista de parametros da funcao/proc. */
-            | lista_id_par DOIS_PONTOS tipo     { debug_print("[param] %s", "\n"); }
+parametros_dec: VAR lista_id_par DOIS_PONTOS tipo { atrubuiPassagemTab(tab, T_REFERENCIA, num_vars); debug_print("[Parametro por referencia] num_vars = %d\n", num_vars);  } /* #TODO Adicionar parametros na lista de parametros da funcao/proc. */
+            | lista_id_par DOIS_PONTOS tipo       { atrubuiPassagemTab(tab, T_VALOR, num_vars); debug_print("[Parametro por valor] num_vars = %d\n", num_vars); }
 ;
-lista_id_par: lista_id_par VIRGULA IDENT  { simb->num_parametros++; simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico); debug_print("[insere param-last] simb->num_parametros = %d\n", simb->num_parametros); } /* insere ultimo Parametro na tabela de simbolos */
-            | IDENT                       { simb->num_parametros++; simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico); debug_print("[insere param] simb->num_parametros = %d\n", simb->num_parametros); } /* insere Parametros na tabela de simbolos */
+lista_id_par: lista_id_par VIRGULA IDENT  { simb->num_parametros++; num_vars++; simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico);
+                                            debug_print("[insere param-last] simb->num_parametros = %d\n", simb->num_parametros); } /* insere ultimo Parametro na tabela de simbolos */
+            | IDENT                       { simb->num_parametros++; num_vars++; simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico);
+                                            debug_print("[insere param] simb->num_parametros = %d\n", simb->num_parametros); } /* insere Parametros na tabela de simbolos */
 ;
 
 comando_composto: T_BEGIN comandos_ T_END
@@ -156,7 +172,7 @@ comandos    : comandos PONTO_E_VIRGULA comando
 
 comando     : NUMERO DOIS_PONTOS com_sem_rot  /* #TODO Tratar rotulo_pascal aqui */
             | comando_composto
-            | com_sem_rot
+            | { passagem = T_VALOR; } com_sem_rot
 ;
 
 com_sem_rot : atrib_proc
@@ -179,10 +195,10 @@ atrib_proc  : IDENT         { simb_aux = procuraSimboloTab(tab, token, nivel_lex
               exec_ou_atrib /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
 ;
 
-exec_ou_atrib: ATRIBUICAO expressao { geraCodigoArgs (NULL, "ARMZ %d, %d", simb_aux->nivel_lexico, simb_aux->deslocamento); }  /* #TODO Comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
+exec_ou_atrib: ATRIBUICAO expressao { geraCodigoARMZI(simb_aux); }  /* #TODO Comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
             | exec_proc             { geraCodigoArgs (NULL, "CHPR %s, %d", simb_aux->rotulo, nivel_lexico); }    /* #TODO Tratar parametros do procedimento: p; p(); p(var1, var2); . */
 ;
-exec_proc   : ABRE_PARENTESES lista_de_parametros FECHA_PARENTESES /* #TODO Verificar se nao eh funcao!! */
+exec_proc   : ABRE_PARENTESES { passagem = T_REFERENCIA; } lista_de_parametros FECHA_PARENTESES { passagem = T_VALOR; }/* #TODO Verificar se nao eh funcao!! */
             | ABRE_PARENTESES FECHA_PARENTESES
             |
 ;
@@ -236,8 +252,7 @@ fator       : ABRE_PARENTESES expressao FECHA_PARENTESES                /* #TODO
 ;
 
 id_ou_func  : IDENT   { simb = procuraSimboloTab(tab, token, nivel_lexico);
-                        geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
-                        empilhaTipoT(&pilha_tipos, simb->tipo); }
+                        geraCodigoCRVLI(simb); empilhaTipoT(&pilha_tipos, simb->tipo); }
 //             | IDENT ABRE_PARENTESES lista_de_parametros FECHA_PARENTESES
 //             | IDENT ABRE_PARENTESES FECHA_PARENTESES
 // ;

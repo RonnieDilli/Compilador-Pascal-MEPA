@@ -8,7 +8,7 @@ typedef enum TipoT {
 
 /*  Estrutura de dados da Lista de Parametros usado por Funcoes e Procedimentos  */
 typedef enum PassagemT {
-  T_REFERENCIA, T_VALOR
+  T_REFERENCIA=1, T_VALOR=2
 } PassagemT;
 
 typedef struct ParametroT {
@@ -69,5 +69,7 @@ int atribuiTipoSimbTab(TabelaSimbT *, TipoT, char *);
 int atribuiTiposTab(TabelaSimbT *, TipoT);
 
 int deslocamentosParamsTab(TabelaSimbT *, int);
+
+int atrubuiPassagemTab(TabelaSimbT *, PassagemT, int);
 
 int imprimeTabSimbolos(TabelaSimbT *);

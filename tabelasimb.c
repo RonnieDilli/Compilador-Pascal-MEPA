@@ -95,14 +95,14 @@ int removeSimboloTab(TabelaSimbT *tab, SimboloT *simbolo) {
       else
         simbolo->ant->prox = simbolo->prox;
       if (simbolo == tab->ultimo) {
-        debug_print("[ultimo1]simbolo->id = %s\n", simbolo->id);
+        // debug_print("[ultimo1]simbolo->id = %s\n", simbolo->id);
         tab->ultimo = simbolo->ant;
       }
       else
         simbolo->prox->ant = simbolo->ant;
 
       tab->num_simbolos--;
-      debug_print("[rm]simbolo->id = %s\n", simbolo->id);
+      // debug_print("[rm]simbolo->id = %s\n", simbolo->id);
       free(simbolo);
     }
   }
@@ -174,6 +174,7 @@ int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo) {
     simbolo = tab->ultimo;
     while (simbolo->tipo == T_UNSET) {
       if (simbolo->categoria == VS) {
+        simbolo->tipo = tipo;
         debug_print("[for] tipo = %d\n", tipo);
         i++;
       }
@@ -196,6 +197,23 @@ int deslocamentosParamsTab(TabelaSimbT *tab, int num_parametros) {
     simbolo = tab->ultimo;
     for (i = num_parametros; i >= 0; i--) {
       simbolo->deslocamento = i - (4 + num_parametros);
+      simbolo = simbolo->ant;
+    }
+    return i;
+  }
+  return -1;
+}
+
+int atrubuiPassagemTab(TabelaSimbT *tab, PassagemT passagem, int num_vars) {
+  SimboloT *simbolo;
+  int i;
+  if (tab == NULL) {
+    exit(2);
+  }
+  else {
+    simbolo = tab->ultimo;
+    for (i = 0; i < num_vars; i++) {
+      simbolo->passagem = passagem;
       debug_print("[for] simbolo->id = %s\n", simbolo->id);
       simbolo = simbolo->ant;
     }
