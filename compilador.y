@@ -67,9 +67,9 @@ programa    :               { geraCodigo (NULL, "INPP"); nivel_lexico = deslocam
 ;
 
 bloco       : rotulos parte_declara_vars  { empilhaAMEM(deslocamento);
-                                    geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
-                                    geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
-              procs_funcs         { geraCodigo (desempilha(&pilha_rot), "NADA"); }
+                                            geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
+                                            geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
+              procs_funcs                 { geraCodigo (desempilha(&pilha_rot), "NADA"); }
               comando_composto
 ;
 
@@ -118,26 +118,26 @@ procs_funcs : PROCEDURE IDENT   { geraCodigoENPR(PROC); } /* #TODO Tratar parame
             | 
 ;
 
-bloco_proc_func: rotulos parte_declara_vars { empilhaAMEM(deslocamento); geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
-                                              geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
-              procs_funcs                   { geraCodigo (desempilha(&pilha_rot), "NADA"); } comando_composto
-              PONTO_E_VIRGULA               { geraCodigoDMEM(); simb = desempilha(&pilha_simbs); removeSimbolosTab(tab, simb->id, simb->nivel_lexico);
-                                              geraCodigoArgs (NULL, "RTPR %d, %d", nivel_lexico--, simb->num_parametros); }  /* #TODO Verificar se a ordem e valor dos parametros esta correta */
+bloco_proc_func: rotulos parte_declara_vars     { empilhaAMEM(deslocamento); geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
+                                                  geraCodigoArgs (NULL, "DSVS %s", rotulo_mepa); }
+              procs_funcs                       { geraCodigo (desempilha(&pilha_rot), "NADA"); }
+              comando_composto PONTO_E_VIRGULA  { geraCodigoDMEM(); simb = desempilha(&pilha_simbs); removeSimbolosTab(tab, simb->id, simb->nivel_lexico);
+                                                  geraCodigoArgs (NULL, "RTPR %d, %d", nivel_lexico--, simb->num_parametros); }  /* #TODO Verificar se a ordem e valor dos parametros esta correta */
               procs_funcs
 ;
 
 params_proc_func: ABRE_PARENTESES { simb->num_parametros=0; deslocamento = -4; num_vars = 0;}
-              lista_param         { deslocamento = 0; /* #TODO voltar configurando deslocamentos -4, -5, etc */ }
+              lista_dec_param         { deslocamento = 0; /* #TODO voltar configurando deslocamentos -4, -5, etc */ }
               FECHA_PARENTESES    /* #TODO Tratar declaracao de parametros, ref e valor */
             |
 ;
 
-lista_param : lista_param PONTO_E_VIRGULA parametros
-            | parametros
+lista_dec_param : lista_dec_param PONTO_E_VIRGULA parametros_dec
+            | parametros_dec
             |
 ;
 
-parametros  : VAR lista_id_par DOIS_PONTOS tipo { debug_print("[VAR param] %s", "\n");  } /* #TODO Adicionar parametros na lista de parametros da funcao/proc. */
+parametros_dec  : VAR lista_id_par DOIS_PONTOS tipo { debug_print("[VAR param] %s", "\n");  } /* #TODO Adicionar parametros na lista de parametros da funcao/proc. */
             | lista_id_par DOIS_PONTOS tipo     { debug_print("[param] %s", "\n"); }
 ;
 lista_id_par: lista_id_par VIRGULA IDENT  { simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico); simb->num_parametros++; simb_aux->deslocamento = deslocamento--; debug_print("[param-last] simb->num_parametros = %d", simb->num_parametros); } /* insere ultimo Parametro na tabela de simbolos */
@@ -227,11 +227,20 @@ termo       : fator MULTIPLICACAO fator { geraCodigo (NULL, "MULT"); }
 ;
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES                /* #TODO Adicionar f(n); */
-            | IDENT   { simb = procuraSimboloTab(tab, token, nivel_lexico);
-                        geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
-                        empilhaTipoT(&pilha_tipos, simb->tipo); }
+            | id_ou_func
             | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token));
                         empilhaTipoT(&pilha_tipos, T_INTEGER); }
+;
+
+id_ou_func  : IDENT   { simb = procuraSimboloTab(tab, token, nivel_lexico);
+                        geraCodigoArgs (NULL, "CRVL %d, %d", simb->nivel_lexico, simb->deslocamento);
+                        empilhaTipoT(&pilha_tipos, simb->tipo); }
+//             | IDENT ABRE_PARENTESES lista_de_parametros FECHA_PARENTESES
+// ;
+// lista_de_parametros: lista_de_parametros parametro
+//             | parametro
+// ;
+// parametro   : expressao
 ;
 
 relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* #TODO Conferir regra (e verificar tipos) */
