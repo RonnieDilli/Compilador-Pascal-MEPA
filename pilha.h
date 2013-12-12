@@ -11,3 +11,5 @@ int inicializaPilha(PilhaT *);
 int empilha(PilhaT *pilha, void *);
 
 void * desempilha(PilhaT *);
+
+void * desempilhaMesmoNULL(PilhaT *);

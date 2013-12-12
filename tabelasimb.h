@@ -1,5 +1,5 @@
 typedef enum CategoriaT {
-  FUN, PF, PROC, ROT, VS
+  FUN, PF, PROC, PROG, ROT, VS
 } CategoriaT;
 
 typedef enum TipoT {
@@ -11,13 +11,14 @@ typedef enum PassagemT {
   T_REFERENCIA, T_VALOR
 } PassagemT;
 
-typedef struct ParametrosT {
+typedef struct ParametroT {
+  char id[TAM_TOKEN];
   TipoT tipo;
   PassagemT passagem;
-} ParametrosT;
+} ParametroT;
 
 typedef struct ListaParamT {
-  ParametrosT *parametros;
+  ParametroT *parametro;
   struct ListaParamT *ant, *prox;
 } ListaParamT;
 

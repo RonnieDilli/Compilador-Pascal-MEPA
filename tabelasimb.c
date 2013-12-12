@@ -27,12 +27,10 @@ SimboloT *retornaSimboloTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
   else {
     simbolo=tab->ultimo;
     while (simbolo != NULL) {
-      debug_print("[while]simbolo->id = %s  -  id = %s\n", simbolo->id, id);
       if ( (strcmp(simbolo->id, id) == 0)  )// && (simbolo->nivel_lexico <= nivel_lexico))
         break;
       simbolo = simbolo->ant;
     }
-    debug_print("[end] return %d  -  id = %s\n", simbolo, id);
     return simbolo;
   }
   return NULL;
@@ -46,6 +44,7 @@ SimboloT *insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int
   }
   else {
     simbolo = retornaSimboloTab(tab, id, nivel_lexico);
+    debug_print("[else] id = %s\n", id);
     // if ( simbolo != NULL ) {
     if ( 0 ) {
       fprintf(stderr, "Warning:\n => O identificador '%s' jah foi declarado anteriormente.\n", id);

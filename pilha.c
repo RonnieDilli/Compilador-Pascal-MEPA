@@ -45,3 +45,18 @@ void * desempilha(PilhaT *pilha) {
     }
   }
 }
+void * desempilhaMesmoNULL(PilhaT *pilha) {
+  if (pilha == NULL) {
+    fprintf(stderr, "ERRO: *** Impossivel desempilhar, a Pilha nao existe!\n");
+    exit(2);
+  }
+  else {
+    if (pilha->topo > 0) {
+      pilha->topo--;
+      return pilha->elemento[pilha->topo];
+    }
+    else {
+      return NULL;
+    }
+  }
+}
