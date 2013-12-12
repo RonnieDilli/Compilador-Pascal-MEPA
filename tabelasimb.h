@@ -68,4 +68,6 @@ int atribuiTipoSimbTab(TabelaSimbT *, TipoT, char *);
 
 int atribuiTiposTab(TabelaSimbT *, TipoT);
 
+int deslocamentosParamsTab(TabelaSimbT *, int);
+
 int imprimeTabSimbolos(TabelaSimbT *);

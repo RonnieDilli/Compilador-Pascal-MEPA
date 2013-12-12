@@ -112,7 +112,7 @@ procs_funcs : PROCEDURE IDENT   { geraCodigoENPR(PROC); } /* #TODO Tratar parame
               params_proc_func PONTO_E_VIRGULA bloco_proc_func
             | FUNCTION IDENT    { geraCodigoENPR(FUN); }
               params_proc_func  { simb->end_retorno = -4 - simb->num_parametros; } /* #TODO Conferir o deslocamento correto. */
-              DOIS_PONTOS       { num_vars=1; deslocamento--; }  /*  ^  #FIXME (simb->end_retorno) Procurar a posicao adequada (usar pilha??) */
+              DOIS_PONTOS              /*  ^  #FIXME (simb->end_retorno) Procurar a posicao adequada (usar pilha??) */
               tipo PONTO_E_VIRGULA bloco_proc_func
             | 
 ;
@@ -127,7 +127,7 @@ bloco_proc_func: rotulos                        { deslocamento=0; }
 ;
 
 params_proc_func: ABRE_PARENTESES { simb->num_parametros=0; deslocamento = -4; }
-              lista_dec_param         { deslocamento = 0; /* #TODO voltar configurando deslocamentos -4, -5, etc */ }
+              lista_dec_param         { deslocamentosParamsTab(tab, simb->num_parametros); deslocamento = 0; /* #TODO voltar configurando deslocamentos -4, -5, etc */ }
               FECHA_PARENTESES    /* #TODO Tratar declaracao de parametros, ref e valor */
             |
 ;
@@ -140,8 +140,8 @@ lista_dec_param : lista_dec_param PONTO_E_VIRGULA parametros_dec
 parametros_dec  : VAR lista_id_par DOIS_PONTOS tipo { debug_print("[VAR param] %s", "\n");  } /* #TODO Adicionar parametros na lista de parametros da funcao/proc. */
             | lista_id_par DOIS_PONTOS tipo     { debug_print("[param] %s", "\n"); }
 ;
-lista_id_par: lista_id_par VIRGULA IDENT  { simb->num_parametros++; simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico); simb_aux->deslocamento = deslocamento--; debug_print("[insere param-last] simb->num_parametros = %d\n", simb->num_parametros); } /* insere ultimo Parametro na tabela de simbolos */
-            | IDENT                       { simb->num_parametros++; simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico); simb_aux->deslocamento = deslocamento--; debug_print("[insere param] simb->num_parametros = %d\n", simb->num_parametros); } /* insere Parametros na tabela de simbolos */
+lista_id_par: lista_id_par VIRGULA IDENT  { simb->num_parametros++; simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico); debug_print("[insere param-last] simb->num_parametros = %d\n", simb->num_parametros); } /* insere ultimo Parametro na tabela de simbolos */
+            | IDENT                       { simb->num_parametros++; simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico); debug_print("[insere param] simb->num_parametros = %d\n", simb->num_parametros); } /* insere Parametros na tabela de simbolos */
 ;
 
 comando_composto: T_BEGIN comandos_ T_END

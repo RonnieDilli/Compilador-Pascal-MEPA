@@ -186,6 +186,24 @@ int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo) {
   }
 }
 
+int deslocamentosParamsTab(TabelaSimbT *tab, int num_parametros) {
+  SimboloT *simbolo;
+  int i;
+  if (tab == NULL) {
+    exit(2);
+  }
+  else {
+    simbolo = tab->ultimo;
+    for (i = num_parametros; i >= 0; i--) {
+      simbolo->deslocamento = i - (4 + num_parametros);
+      debug_print("[for] simbolo->id = %s\n", simbolo->id);
+      simbolo = simbolo->ant;
+    }
+    return i;
+  }
+  return -1;
+}
+
 int imprimeTabSimbolos(TabelaSimbT *tab) {
   SimboloT *simbolo;
   int total_simbolos = 0;
