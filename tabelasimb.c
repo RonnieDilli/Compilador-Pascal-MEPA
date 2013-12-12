@@ -222,6 +222,30 @@ int atrubuiPassagemTab(TabelaSimbT *tab, PassagemT passagem, int num_vars) {
   return -1;
 }
 
+int insereParamLista(SimboloT  *simb, TipoT tipo, PassagemT passagem, int n_params) {
+  int i;
+  if (simb->num_parametros >= TAM_LISTA_PARAM ) {
+    fprintf(stderr, "ERRO: ***\n => O numero de Parametros (%d) passou do limite interno.\n", TAM_LISTA_PARAM);
+    exit(5);
+  }
+  else {
+    // if (simb->num_parametros - n_params == 0)
+    //   simb->lista_param = malloc (sizeof (ParametroT[TAM_LISTA_PARAM]));
+    
+    if (simb->lista_param == NULL ) {
+      fprintf(stderr, "ERRO: *** A Lista Parametros nao foi alocada!\n");
+      exit(2);
+    }
+    else {
+      for (i=n_params; i > 0; i--) {
+        simb->lista_param[simb->num_parametros + n_params - i].tipo = tipo;
+        simb->lista_param[simb->num_parametros + n_params - i].passagem = passagem;
+      }
+    }
+  }
+  return 0;
+}
+
 int imprimeTabSimbolos(TabelaSimbT *tab) {
   SimboloT *simbolo;
   int total_simbolos = 0;

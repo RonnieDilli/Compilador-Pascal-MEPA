@@ -1,3 +1,5 @@
+#define TAM_LISTA_PARAM 255
+
 typedef enum CategoriaT {
   FUN, PF, PROC, PROG, ROT, VS
 } CategoriaT;
@@ -12,17 +14,10 @@ typedef enum PassagemT {
 } PassagemT;
 
 typedef struct ParametroT {
-  char id[TAM_TOKEN];
   TipoT tipo;
   PassagemT passagem;
 } ParametroT;
 
-typedef struct ListaParamT {
-  ParametroT *parametro;
-  struct ListaParamT *ant, *prox;
-} ListaParamT;
-
-/*  Estrutura dos Simbolos  */
 typedef struct SimboloT {
   char id[TAM_TOKEN];
   CategoriaT categoria;
@@ -40,7 +35,7 @@ typedef struct SimboloT {
     struct {
       int num_parametros;
       char *rotulo;
-      ListaParamT *lista_param;
+      ParametroT lista_param[TAM_LISTA_PARAM];
     };
   };
   struct SimboloT *ant, *prox;
@@ -71,5 +66,7 @@ int atribuiTiposTab(TabelaSimbT *, TipoT);
 int deslocamentosParamsTab(TabelaSimbT *, int);
 
 int atrubuiPassagemTab(TabelaSimbT *, PassagemT, int);
+
+int insereParamLista(SimboloT  *, TipoT, PassagemT, int);
 
 int imprimeTabSimbolos(TabelaSimbT *);

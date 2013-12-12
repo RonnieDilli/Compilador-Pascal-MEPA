@@ -12,7 +12,7 @@
 #include "pilha.h"
 #include "aux.h"
 
-int num_vars, nivel_lexico, deslocamento, cont_rotulo, *temp_num; /* #DEBUG vars: num, *temp_num, i */
+int num_vars, nivel_lexico, deslocamento, cont_rotulo, *temp_num, indice_param;
 char *rotulo_mepa, *rotulo_mepa_aux;
 SimboloT *simb, *simb_aux;
 
@@ -35,8 +35,8 @@ TipoT tipo_aux;
   if (simbolo->passagem == T_VALOR) { geraCodigoArgs (NULL, "ARMZ %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); } \
     else { geraCodigoArgs (NULL, "ARMI %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); }
 #define geraCodigoCRVLI(simbolo) \
-  debug_print("[geraCodigoCRVLI] simbolo->id = '%s', simbolo->passagem=%d, passagem=%d\n", simbolo->id, simbolo->passagem, passagem); \
-  if (passagem == T_REFERENCIA) { if (simbolo->passagem == T_REFERENCIA) { geraCodigoArgs (NULL, "CREN %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); } \ //#TODO Arrumar logica Ifs
+  debug_print("[geraCodigoCRVLI] simbolo->id = '%s', indice_param=%d, passagem=%d\n", simbolo->id, indice_param, passagem); \
+  if (passagem == T_REFERENCIA) { if (simbolo->lista_param[indice_param].passagem == T_REFERENCIA) { geraCodigoArgs (NULL, "CREN %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); } \
     else { geraCodigoArgs (NULL, "CRVL %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); } \
       } else if (simbolo->passagem == T_VALOR) { geraCodigoArgs (NULL, "CRVL %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); } \
           else { geraCodigoArgs (NULL, "CRVI %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); }
@@ -109,9 +109,9 @@ declara_var : lista_id_var DOIS_PONTOS tipo { geraCodigoArgs (NULL, "AMEM %d", n
               PONTO_E_VIRGULA
 ;
 
-tipo        : INTEGER { atribuiTiposTab(tab, T_INTEGER); }
-            | BOOLEAN { atribuiTiposTab(tab, T_BOOLEAN); }
-            | IDENT   { atribuiTiposTab(tab, T_UNKNOWN); } /* Tipo Desconhecido(ou nao tratado). #Sugestao: Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
+tipo        : INTEGER { tipo_aux = atribuiTiposTab(tab, T_INTEGER); }
+            | BOOLEAN { tipo_aux = atribuiTiposTab(tab, T_BOOLEAN); }
+            | IDENT   { tipo_aux = atribuiTiposTab(tab, T_UNKNOWN); } /* Tipo Desconhecido(ou nao tratado). #Sugestao: Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT  { num_vars++; simb = insereSimboloTab(tab, token, VS, nivel_lexico); simb->deslocamento = deslocamento++; } /* insere ultima var na tabela de simbolos */
@@ -151,8 +151,8 @@ lista_dec_param : lista_dec_param PONTO_E_VIRGULA
             |
 ;
 
-parametros_dec: VAR lista_id_par DOIS_PONTOS tipo { atrubuiPassagemTab(tab, T_REFERENCIA, num_vars); debug_print("[Parametro por referencia] num_vars = %d\n", num_vars);  } /* #TODO Adicionar parametros na lista de parametros da funcao/proc. */
-            | lista_id_par DOIS_PONTOS tipo       { atrubuiPassagemTab(tab, T_VALOR, num_vars); debug_print("[Parametro por valor] num_vars = %d\n", num_vars); }
+parametros_dec: VAR lista_id_par DOIS_PONTOS tipo { atrubuiPassagemTab(tab, T_REFERENCIA, num_vars); insereParamLista(simb, tipo_aux, T_REFERENCIA, num_vars); debug_print("[Parametro por referencia] num_vars = %d\n", num_vars);  } /* #TODO Adicionar parametros na lista de parametros da funcao/proc. */
+            | lista_id_par DOIS_PONTOS tipo       { atrubuiPassagemTab(tab, T_VALOR, num_vars); insereParamLista(simb, tipo_aux, T_VALOR, num_vars); debug_print("[Parametro por valor] num_vars = %d\n", num_vars); }
 ;
 lista_id_par: lista_id_par VIRGULA IDENT  { simb->num_parametros++; num_vars++; simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico);
                                             debug_print("[insere param-last] simb->num_parametros = %d\n", simb->num_parametros); } /* insere ultimo Parametro na tabela de simbolos */
@@ -198,12 +198,12 @@ atrib_proc  : IDENT         { simb_aux = procuraSimboloTab(tab, token, nivel_lex
 exec_ou_atrib: ATRIBUICAO expressao { geraCodigoARMZI(simb_aux); }  /* #TODO Comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
             | exec_proc             { geraCodigoArgs (NULL, "CHPR %s, %d", simb_aux->rotulo, nivel_lexico); }    /* #TODO Tratar parametros do procedimento: p; p(); p(var1, var2); . */
 ;
-exec_proc   : ABRE_PARENTESES { passagem = T_REFERENCIA; } lista_de_parametros FECHA_PARENTESES { passagem = T_VALOR; }/* #TODO Verificar se nao eh funcao!! */
+exec_proc   : ABRE_PARENTESES { passagem = T_REFERENCIA; indice_param=0; } lista_de_parametros FECHA_PARENTESES { passagem = T_VALOR; }/* #TODO Verificar se nao eh funcao!! */
             | ABRE_PARENTESES FECHA_PARENTESES
             |
 ;
-lista_de_parametros: lista_de_parametros VIRGULA expressao
-            | expressao
+lista_de_parametros: lista_de_parametros VIRGULA expressao { indice_param++; } 
+            | expressao { indice_param++; }
 ;
 
 com_condic  : if_simples %prec LOWER_THAN_ELSE  { geraCodigo (desempilha(&pilha_rot), "NADA"); }
