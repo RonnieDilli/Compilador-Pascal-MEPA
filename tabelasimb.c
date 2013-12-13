@@ -56,7 +56,8 @@ SimboloT *insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int
 
       tab->num_simbolos++;
       
-      simbolo->lista_param = malloc (sizeof (ParametroT) * TAM_LISTA_PARAM);
+      if (categoria == FUN || categoria == PROC)
+        simbolo->lista_param = malloc (sizeof (ParametroT) * TAM_LISTA_PARAM);
 
       if (tab->num_simbolos == 1) {
         tab->primeiro = simbolo;
@@ -115,12 +116,13 @@ int removeSimbolosTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
     else {
       num_var_simples = 0;
       while ( (simbolo=simbolo->prox) != NULL) {
+        // if (( simbolo->nivel_lexico >= nivel_lexico) && (simbolo->categoria != PROC) && (simbolo->categoria != FUN) )  {
         if (( simbolo->nivel_lexico == nivel_lexico) && (simbolo->categoria == VS || simbolo->categoria == PF) ) {
           num_var_simples++;
           removeSimboloTab(tab, simbolo);
         }
         else
-          if (( simbolo->nivel_lexico < nivel_lexico) || ( simbolo->categoria != VS ))
+          if (( simbolo->nivel_lexico != nivel_lexico) || ( simbolo->categoria != VS ))
             break;
       }
     }
@@ -128,27 +130,28 @@ int removeSimbolosTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
   return 0;
 }
 
-int atribuiTipoSimbTab(TabelaSimbT *tab, TipoT tipo, char *id) {
+int removeFPSimbolosTab(TabelaSimbT *tab, SimboloT *pai) {
   SimboloT *simbolo;
-  CategoriaT categoria;
+  int nivel_lexico;
+  int num_var_simples;
+
   if (tab == NULL ) {
     trataErro(ERRO_TAB_NAO_ALOC, "");  }
   else {
-    simbolo = retornaSimboloTab(tab, id, nivel_lexico);
-    if (simbolo == NULL) {
-      trataErro(ERRO_SINT_IDENT_NAO_ENC, id);
+    simbolo = pai;
+    if ( simbolo == NULL ) {
+      trataErro(ERRO_SIMB_NAO_ENC, "");
     }
     else {
-      categoria = simbolo->categoria;
-      debug_print("[else-if] categoria = %d\n", categoria);
-      if (categoria == FUN || categoria == PF || categoria == VS) {
-        simbolo->tipo = tipo;
-        debug_print("[else-if-if] simbolo->tipo = %d\n", simbolo->tipo);
-        return 0;
+      nivel_lexico = simbolo->nivel_lexico;
+      num_var_simples = 0;
+      while ( (simbolo=simbolo->prox) != NULL) {
+        num_var_simples++;
+        removeSimboloTab(tab, simbolo);
       }
     }
   }
-  return -1;
+  return 0;
 }
 
 int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo) {
@@ -160,7 +163,7 @@ int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo) {
     i=0;
     simbolo = tab->ultimo;
     while (simbolo->tipo == T_UNSET) {
-      if (simbolo->categoria == VS || simbolo->categoria == PF) {
+      if (simbolo->categoria == VS || simbolo->categoria == FUN || simbolo->categoria == PF) {
         simbolo->tipo = tipo;
         debug_print("[for] tipo = %d\n", tipo);
         i++;
@@ -172,7 +175,7 @@ int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo) {
     }
     return i;
   }
-  return 0;
+  return -1;
 }
 
 int deslocamentosParamsTab(TabelaSimbT *tab, int num_parametros) {
@@ -191,7 +194,7 @@ int deslocamentosParamsTab(TabelaSimbT *tab, int num_parametros) {
   return -1;
 }
 
-int atrubuiPassagemTab(TabelaSimbT *tab, PassagemT passagem, int num_vars) {
+int atribuiPassagemTab(TabelaSimbT *tab, PassagemT passagem, int num_vars) {
   SimboloT *simbolo;
   int i;
   if (tab == NULL ) {
@@ -223,9 +226,10 @@ int insereParamLista(SimboloT  *simb, TipoT tipo, PassagemT passagem, int n_para
         trataErro(ERRO_LISTA_PARAM_NAO_ALOC, "");
       }
       else {
-        for (i=n_params; i > 0; i--) {
-          simb->lista_param[simb->num_parametros + n_params - i].tipo = tipo;
-          simb->lista_param[simb->num_parametros + n_params - i].passagem = passagem;
+        for (i=0; i < n_params; i++) {
+          debug_print("[for] simb->id = %s, passagem = %d, soma = %d\n", simb->id, passagem, (simb->num_parametros - n_params + i));
+          // simb->lista_param[simb->num_parametros - n_params + i].tipo = tipo;
+          simb->lista_param[simb->num_parametros - n_params + i].passagem = passagem; // #TODO inverter
         }
       }
     }

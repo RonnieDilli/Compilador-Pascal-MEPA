@@ -38,7 +38,7 @@ typedef struct SimboloT {
       ParametroT *lista_param;
     };
   };
-  struct SimboloT *ant, *prox;
+  struct SimboloT *ant, *prox, *pai;
 } SimboloT;
 
 /*  Estrutura de dados da Tabela de Simbolos  */
@@ -59,13 +59,15 @@ int removeSimboloTab(TabelaSimbT *, SimboloT *);
 
 int removeSimbolosTab(TabelaSimbT *, char *, int);
 
+int removeFPSimbolosTab(TabelaSimbT *, SimboloT *);
+
 int atribuiTipoSimbTab(TabelaSimbT *, TipoT, char *);
 
 int atribuiTiposTab(TabelaSimbT *, TipoT);
 
 int deslocamentosParamsTab(TabelaSimbT *, int);
 
-int atrubuiPassagemTab(TabelaSimbT *, PassagemT, int);
+int atribuiPassagemTab(TabelaSimbT *, PassagemT, int);
 
 int insereParamLista(SimboloT  *, TipoT, PassagemT, int);
 
