@@ -45,7 +45,7 @@ TipoT tipo_aux;
   debug_print("[geraCodigoCarregaValor] simbolo->id = '%s', indice_param=%d, chamada_de_proc=%d\n", simbolo->id, indice_param, chamada_de_proc); \
   if (chamada_de_proc) { teste++;\
     if (proc_atual != NULL) { \
-      if ((proc_atual->lista_param[indice_param].passagem == T_REFERENCIA) && (simbolo->passagem == T_VALOR)) { geraCodigoCRxx(">>ENTROU CREN", simbolo); } \
+      if ((proc_atual->lista_param[indice_param].passagem == T_REFERENCIA) && (simbolo->passagem == T_VALOR)) { geraCodigoCRxx("CREN", simbolo); } \
       else { geraCodigoCRxx("CRVL", simbolo); } }\
     else { geraCodigoCRxx("CRVL", simbolo); } } \
   else if (simbolo->passagem == T_VALOR) { geraCodigoArgs (NULL, "CRVL %d, %d", simbolo->nivel_lexico, simbolo->deslocamento); } \
@@ -203,12 +203,12 @@ lista_param_impr: lista_param_impr VIRGULA IDENT  { geraCodigoIMPR(); }
             | IDENT                               { geraCodigoIMPR(); }  /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
 ;
 
-atrib_proc  : IDENT         { simb_aux = procuraSimboloTab(tab, token, nivel_lexico); empilhaTipoT(&pilha_tipos, simb_aux->tipo); }
+atrib_proc  : IDENT         { simb_aux = procuraSimboloTab(tab, token, nivel_lexico); empilhaTipoT(&pilha_tipos, simb_aux->tipo); proc_atual=simb_aux;}
               exec_ou_atrib /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
 ;
 
 exec_ou_atrib: ATRIBUICAO expressao { geraCodigoARMZI(simb_aux); }  /* #TODO Comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
-            | exec_proc             { geraCodigoArgs (NULL, "CHPR %s, %d", simb_aux->rotulo, nivel_lexico); proc_atual=simb_aux; }    /* #TODO Tratar parametros do procedimento: p; p(); p(var1, var2); . */
+            | exec_proc             { geraCodigoArgs (NULL, "CHPR %s, %d", simb_aux->rotulo, nivel_lexico); }    /* #TODO Tratar parametros do procedimento: p; p(); p(var1, var2); . */
 ;
 exec_proc   : ABRE_PARENTESES { chamada_de_proc = true; indice_param=0; } lista_de_parametros FECHA_PARENTESES { chamada_de_proc = false; } /* #TODO Verificar se nao eh funcao!! */
             | ABRE_PARENTESES FECHA_PARENTESES
