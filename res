@@ -1,0 +1,1 @@
+usage compilador <arq>b
