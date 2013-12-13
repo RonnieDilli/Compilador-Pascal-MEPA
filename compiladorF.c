@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "compilador.h"
+#include "trataerro.h"
 
 /* -------------------------------------------------------------------
  *  variáveis globais
@@ -37,7 +38,7 @@ void geraCodigo (char* rot, char* comando) {
 
 int imprimeErro ( char* erro ) {
   fprintf (stderr, "Erro na linha %d - %s\n", nl, erro);
-  exit(11);
+  exit(ERRO_SINTATICO);
 }
 
 /* -------------------------------------------------------------------
@@ -47,5 +48,5 @@ int imprimeErro ( char* erro ) {
 extern char *yytext;
 void yyerror (char *s) {  /*  Arruma erro de compilacao do ProjetoBase  */
     fprintf (stderr, "ERR: *** %s: at or before '%s', in line: %d\n", s, yytext, nl);
-    exit(42);
+    exit(ERRO_SINTATICO);
 }

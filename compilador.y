@@ -11,6 +11,7 @@
 #include "tabelasimb.h"
 #include "pilha.h"
 #include "aux.h"
+#include "trataerro.h"
 
 int num_vars, nivel_lexico, deslocamento, cont_rotulo, *temp_num, indice_param;
 char *rotulo_mepa, *rotulo_mepa_aux;

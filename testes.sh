@@ -55,12 +55,12 @@ if [ -x 'compilador' ]; then
         echo "Erro retornado ($f/ERRO_ESPERADO) diferente do retorno ($retorno)!"
       fi
     else
-      echo "Arquivo compilado com sucesso: '$f'"
+      echo "Arquivo com ERRO esperado, mas compilado com sucesso: '$f'"
     fi
   done
   IFS=$SAVEIFS
   if [ $C_EX_TESTADOS != 0 ]; then
-    echo -e "\n--------------------\n[$ERROS_SINTATICOS/$C_EX_TESTADOS] Contra Exemplos tiveram erro sintatico detectado."
+    echo -e "\n--------------------\n[$ERROS_SINTATICOS/$C_EX_TESTADOS] Contra Exemplos tiveram erro(s) sintatico(s) detectado(s)."
     echo -e "[$(($C_EX_TESTADOS - $ERROS_ESPERADOS))] Nao geraram o ERRO esperado!"
   fi
 else

@@ -4,26 +4,23 @@
 #include "compilador.h"
 #include "tabelasimb.h"
 #include "pilha.h"
+#include "trataerro.h"
 
 SimboloT *procuraSimboloTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
   SimboloT *simbolo;
   simbolo = retornaSimboloTab(tab, id, nivel_lexico);
 
   if ( simbolo == NULL ) {
-    fprintf(stderr, "ERRO: *** Erro sintatico!\n => O identificador '%s' nao foi encontrado.\n", id);
-    exit(10);
+    trataErro(ERRO_SINT_IDENT_NAO_ENC, id);
   }
-  else {
-    return simbolo;
-  }
+  return simbolo;
 }
 
 SimboloT *retornaSimboloTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
   SimboloT *simbolo;
   if (tab == NULL ) {
-    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
-    exit(2);
-  }
+    trataErro(ERRO_TAB_NAO_ALOC, "");
+   }
   else {
     simbolo=tab->ultimo;
     while (simbolo != NULL) {
@@ -39,22 +36,19 @@ SimboloT *retornaSimboloTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
 SimboloT *insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int nivel_lexico) {
   SimboloT *simbolo;
   if (tab == NULL ) {
-    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
-    exit(2);
+    trataErro(ERRO_TAB_NAO_ALOC, "");
   }
   else {
     simbolo = retornaSimboloTab(tab, id, nivel_lexico);
     debug_print("[else] id = %s\n", id);
     // if ( simbolo != NULL ) {
-    if ( 0 ) {
-      fprintf(stderr, "Warning:\n => O identificador '%s' jah foi declarado anteriormente.\n", id);
-      // exit(5);
+    if ( 0 ) {    /* #TODO Detectar se simbolo ja foi declarado pela fun, proc */
+      trataErro(WARN_IDENT_JA_DEC, id);
     }
     else {
       simbolo = malloc (sizeof (SimboloT));
       if (simbolo == NULL) {
-        fprintf(stderr, "ERRO: *** Nao foi possivel alocar espaco na memoria!\n");
-        exit(3);
+        trataErro(ERRO_ALOCACAO, "");
       }
       strcpy(simbolo->id, id);
       simbolo->categoria = categoria;
@@ -82,13 +76,10 @@ SimboloT *insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int
 
 int removeSimboloTab(TabelaSimbT *tab, SimboloT *simbolo) {
   if (tab == NULL ) {
-    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
-    exit(2);
-  }
+    trataErro(ERRO_TAB_NAO_ALOC, "");  }
   else {
     if ( simbolo == NULL ) {
-      fprintf(stderr, "ERRO: *** Impossivel remover!\n => O simbolo nao foi encontrado.\n");
-      exit(6);
+      trataErro(ERRO_SIMB_NAO_ENC, "");
     }
     else {
       if (simbolo == tab->primeiro) {
@@ -115,14 +106,11 @@ int removeSimbolosTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
   SimboloT *simbolo;
   int num_var_simples;
   if (tab == NULL ) {
-    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
-    exit(2);
-  }
+    trataErro(ERRO_TAB_NAO_ALOC, "");  }
   else {
     simbolo = retornaSimboloTab(tab, id, nivel_lexico);
     if ( simbolo == NULL ) {
-      fprintf(stderr, "ERRO: *** Impossivel remover!\n => O identificador '%s' nao foi encontrado.\n", id);
-      exit(6);
+      trataErro(ERRO_SIMB_NAO_ENC, id);
     }
     else {
       num_var_simples = 0;
@@ -144,12 +132,13 @@ int atribuiTipoSimbTab(TabelaSimbT *tab, TipoT tipo, char *id) {
   SimboloT *simbolo;
   CategoriaT categoria;
   if (tab == NULL ) {
-    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
-    exit(2);
-  }
+    trataErro(ERRO_TAB_NAO_ALOC, "");  }
   else {
     simbolo = retornaSimboloTab(tab, id, nivel_lexico);
-    if (simbolo != NULL) {
+    if (simbolo == NULL) {
+      trataErro(ERRO_SINT_IDENT_NAO_ENC, id);
+    }
+    else {
       categoria = simbolo->categoria;
       debug_print("[else-if] categoria = %d\n", categoria);
       if (categoria == FUN || categoria == PF || categoria == VS) {
@@ -157,10 +146,6 @@ int atribuiTipoSimbTab(TabelaSimbT *tab, TipoT tipo, char *id) {
         debug_print("[else-if-if] simbolo->tipo = %d\n", simbolo->tipo);
         return 0;
       }
-    }
-    else {
-      fprintf(stderr, "ERRO: *** Impossivel atrubuir tipo!\n => O identificador '%s' nao foi encontrado.\n", id);
-      exit (7);
     }
   }
   return -1;
@@ -170,9 +155,7 @@ int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo) {
   SimboloT *simbolo;
   int i;
   if (tab == NULL ) {
-    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
-    exit(2);
-  }
+    trataErro(ERRO_TAB_NAO_ALOC, "");  }
   else {
     i=0;
     simbolo = tab->ultimo;
@@ -189,15 +172,14 @@ int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo) {
     }
     return i;
   }
+  return 0;
 }
 
 int deslocamentosParamsTab(TabelaSimbT *tab, int num_parametros) {
   SimboloT *simbolo;
   int i;
   if (tab == NULL ) {
-    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
-    exit(2);
-  }
+    trataErro(ERRO_TAB_NAO_ALOC, "");  }
   else {
     simbolo = tab->ultimo;
     for (i = num_parametros; i >= 0; i--) {
@@ -213,8 +195,7 @@ int atrubuiPassagemTab(TabelaSimbT *tab, PassagemT passagem, int num_vars) {
   SimboloT *simbolo;
   int i;
   if (tab == NULL ) {
-    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
-    exit(2);
+    trataErro(ERRO_TAB_NAO_ALOC, "");
   }
   else {
     simbolo = tab->ultimo;
@@ -231,18 +212,15 @@ int atrubuiPassagemTab(TabelaSimbT *tab, PassagemT passagem, int num_vars) {
 int insereParamLista(SimboloT  *simb, TipoT tipo, PassagemT passagem, int n_params) {
   int i;
   if (simb == NULL ) {
-    fprintf(stderr, "ERRO: *** O Parametro nao foi encontrado, impossivel inserir na Lista de Parametros!\n");
-    exit(2);
+    trataErro(ERRO_PARAM_NAO_ENC, "");
   }
   else {
     if (simb->num_parametros >= TAM_LISTA_PARAM ) {
-      fprintf(stderr, "ERRO: ***\n => O numero de Parametros (%d) passou do limite interno.\n", TAM_LISTA_PARAM);
-      exit(5);
+      trataErro(ERRO_MAX_PARAM, "");
     }
     else {
       if (simb->lista_param == NULL ) {
-        fprintf(stderr, "ERRO: *** A Lista Parametros nao foi alocada!\n");
-        exit(2);
+        trataErro(ERRO_LISTA_PARAM_NAO_ALOC, "");
       }
       else {
         for (i=n_params; i > 0; i--) {
@@ -259,8 +237,7 @@ int imprimeTabSimbolos(TabelaSimbT *tab) {
   SimboloT *simbolo;
   int total_simbolos = 0;
   if (tab == NULL ) {
-    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
-    exit(2);
+    trataErro(ERRO_TAB_NAO_ALOC, "");
   }
   else {
     printf("[%s] tab->num_simbolos = %d\n", __func__, tab->num_simbolos); // #DEBUG

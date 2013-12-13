@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "compilador.h"
+#include "trataerro.h"
 #include "pilha.h"
 
 int inicializaPilha(PilhaT *pilha) {
@@ -15,48 +16,38 @@ int inicializaPilha(PilhaT *pilha) {
 
 int empilha(PilhaT *pilha, void *novo_elemento) {
   if (pilha == NULL) {
-    fprintf(stderr, "ERRO: *** Impossivel empilhar, a Pilha nao existe!\n");
-    exit(2);
+    trataErro(ERRO_PILHA_N_EXISTE, "");
   }
   else if (pilha->topo > PILHA_TAM) {
-    fprintf(stderr, "ERRO: *** Tamanho da pilha (%d elementos) excedido!\n", PILHA_TAM);
-    exit(2);
+    trataErro(ERRO_PILHA_TAM_EXCED, "");
   }
   else {
     pilha->elemento[pilha->topo] = novo_elemento;
     pilha->topo++;
-    return 0;
   }
+  return 0;
 }
 
 void * desempilha(PilhaT *pilha) {
   if (pilha == NULL) {
-    fprintf(stderr, "ERRO: *** Impossivel desempilhar, a Pilha nao existe!\n");
-    exit(2);
+    trataErro(ERRO_PILHA_N_EXISTE, "");
+  }
+  else if (pilha->topo > 0) {
+    pilha->topo--;
+    return pilha->elemento[pilha->topo];
   }
   else {
-    if (pilha->topo > 0) {
-      pilha->topo--;
-      return pilha->elemento[pilha->topo];
-    }
-    else {
-      fprintf(stderr, "ERRO: *** Impossivel desempilhar, a Pilha está vazia!\n");
-      exit(2);
-    }
+    trataErro(ERRO_PILHA_VAZIA, "");
   }
+  return NULL;
 }
 void * desempilhaMesmoNULL(PilhaT *pilha) {
   if (pilha == NULL) {
-    fprintf(stderr, "ERRO: *** Impossivel desempilhar, a Pilha nao existe!\n");
-    exit(2);
+    trataErro(ERRO_PILHA_N_EXISTE, "");
   }
-  else {
-    if (pilha->topo > 0) {
-      pilha->topo--;
-      return pilha->elemento[pilha->topo];
-    }
-    else {
-      return NULL;
-    }
+  else if (pilha->topo > 0) {
+    pilha->topo--;
+    return pilha->elemento[pilha->topo];
   }
+  return NULL;
 }
