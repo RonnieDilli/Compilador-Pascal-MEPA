@@ -141,7 +141,8 @@ int removeSimbolosTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
 int atribuiTipoSimbTab(TabelaSimbT *tab, TipoT tipo, char *id) {
   SimboloT *simbolo;
   CategoriaT categoria;
-  if (tab == NULL) {
+  if (tab == NULL ) {
+    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
     exit(2);
   }
   else {
@@ -166,7 +167,8 @@ int atribuiTipoSimbTab(TabelaSimbT *tab, TipoT tipo, char *id) {
 int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo) {
   SimboloT *simbolo;
   int i;
-  if (tab == NULL) {
+  if (tab == NULL ) {
+    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
     exit(2);
   }
   else {
@@ -190,7 +192,8 @@ int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo) {
 int deslocamentosParamsTab(TabelaSimbT *tab, int num_parametros) {
   SimboloT *simbolo;
   int i;
-  if (tab == NULL) {
+  if (tab == NULL ) {
+    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
     exit(2);
   }
   else {
@@ -207,7 +210,8 @@ int deslocamentosParamsTab(TabelaSimbT *tab, int num_parametros) {
 int atrubuiPassagemTab(TabelaSimbT *tab, PassagemT passagem, int num_vars) {
   SimboloT *simbolo;
   int i;
-  if (tab == NULL) {
+  if (tab == NULL ) {
+    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
     exit(2);
   }
   else {
@@ -224,22 +228,28 @@ int atrubuiPassagemTab(TabelaSimbT *tab, PassagemT passagem, int num_vars) {
 
 int insereParamLista(SimboloT  *simb, TipoT tipo, PassagemT passagem, int n_params) {
   int i;
-  if (simb->num_parametros >= TAM_LISTA_PARAM ) {
-    fprintf(stderr, "ERRO: ***\n => O numero de Parametros (%d) passou do limite interno.\n", TAM_LISTA_PARAM);
-    exit(5);
+  if (simb == NULL ) {
+    fprintf(stderr, "ERRO: *** O Parametro nao foi encontrado, impossivel inserir na Lista de Parametros!\n");
+    exit(2);
   }
   else {
-    // if (simb->num_parametros - n_params == 0)
-    //   simb->lista_param = malloc (sizeof (ParametroT[TAM_LISTA_PARAM]));
-    
-    if (simb->lista_param == NULL ) {
-      fprintf(stderr, "ERRO: *** A Lista Parametros nao foi alocada!\n");
-      exit(2);
+    if (simb->num_parametros >= TAM_LISTA_PARAM ) {
+      fprintf(stderr, "ERRO: ***\n => O numero de Parametros (%d) passou do limite interno.\n", TAM_LISTA_PARAM);
+      exit(5);
     }
     else {
-      for (i=n_params; i > 0; i--) {
-        simb->lista_param[simb->num_parametros + n_params - i].tipo = tipo;
-        simb->lista_param[simb->num_parametros + n_params - i].passagem = passagem;
+      // if (simb->num_parametros - n_params == 0)
+      //   simb->lista_param = malloc (sizeof (ParametroT[TAM_LISTA_PARAM]));
+
+      if (simb->lista_param == NULL ) {
+        fprintf(stderr, "ERRO: *** A Lista Parametros nao foi alocada!\n");
+        exit(2);
+      }
+      else {
+        for (i=n_params; i > 0; i--) {
+          simb->lista_param[simb->num_parametros + n_params - i].tipo = tipo;
+          simb->lista_param[simb->num_parametros + n_params - i].passagem = passagem;
+        }
       }
     }
   }
@@ -249,8 +259,9 @@ int insereParamLista(SimboloT  *simb, TipoT tipo, PassagemT passagem, int n_para
 int imprimeTabSimbolos(TabelaSimbT *tab) {
   SimboloT *simbolo;
   int total_simbolos = 0;
-  if (tab == NULL) {
-    return -1;
+  if (tab == NULL ) {
+    fprintf(stderr, "ERRO: *** Tabela de simbolos dinamica nao foi alocada!\n");
+    exit(2);
   }
   else {
     printf("[%s] tab->num_simbolos = %d\n", __func__, tab->num_simbolos); // #DEBUG
