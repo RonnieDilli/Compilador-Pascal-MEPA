@@ -4,7 +4,7 @@ typedef enum ErroT {
   SEM_ERRO=0,
 
   /* Erros Sintaticos */
-  ERRO_SINTATICO=42, ERRO_SINT_IDENT_NAO_ENC=42,
+  ERRO_SINTATICO=40, ERRO_SINT_IDENT_NAO_ENC=41, ERRO_TIPO=42,
 
   /* Alocacao mal sucedida */
   ERRO_ALOCACAO, ERRO_TAB_NAO_ALOC,

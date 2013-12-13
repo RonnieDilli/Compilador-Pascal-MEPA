@@ -30,15 +30,3 @@ begin                # begin
  maior que           # > 
  ident               # k 
  pt_virgula          # ; 
- if                  # if 
- abre_parenteses     # ( 
- ident               # n 
- soma                # + 
- numero              # 1 
- fecha_parenteses    # ) 
- then                # then 
- ident               # n 
- atribuicao          # := 
- numero              # 1 
-end                  # end 
- ponto               # . 

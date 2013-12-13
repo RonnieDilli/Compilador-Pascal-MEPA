@@ -15,9 +15,11 @@ int trataErro(ErroT cod_erro, char *str) {
   case ERRO_SINT_IDENT_NAO_ENC:
     fprintf(stderr, "ERRO: *** Erro sintatico!\n => O identificador '%s' nao foi encontrado.\n", str);
     exit(cod_erro);
-
   case ERRO_IDENT_JA_DEC:
-    fprintf(stderr, "Warning:\n => O identificador '%s' jah foi declarado anteriormente.\n", str);
+    fprintf(stderr, "ERRO: *** Erro sintatico!\n => O identificador '%s' jah foi declarado anteriormente.\n", str);
+    exit(cod_erro);
+  case ERRO_TIPO:
+    fprintf(stderr, "ERRO: *** Erro sintatico!\n => Tipos incompatíveis!\n");
     exit(cod_erro);
 
   case ERRO_TAB_NAO_ALOC:

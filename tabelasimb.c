@@ -103,33 +103,6 @@ int removeSimboloTab(TabelaSimbT *tab, SimboloT *simbolo) {
   return 0;
 }
 
-int removeSimbolosTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
-  SimboloT *simbolo;
-  int num_var_simples;
-  if (tab == NULL ) {
-    trataErro(ERRO_TAB_NAO_ALOC, "");  }
-  else {
-    simbolo = retornaSimboloTab(tab, id, nivel_lexico);
-    if ( simbolo == NULL ) {
-      trataErro(ERRO_SIMB_NAO_ENC, id);
-    }
-    else {
-      num_var_simples = 0;
-      while ( (simbolo=simbolo->prox) != NULL) {
-        // if (( simbolo->nivel_lexico >= nivel_lexico) && (simbolo->categoria != PROC) && (simbolo->categoria != FUN) )  {
-        if (( simbolo->nivel_lexico == nivel_lexico) && (simbolo->categoria == VS || simbolo->categoria == PF) ) {
-          num_var_simples++;
-          removeSimboloTab(tab, simbolo);
-        }
-        else
-          if (( simbolo->nivel_lexico != nivel_lexico) || ( simbolo->categoria != VS ))
-            break;
-      }
-    }
-  }
-  return 0;
-}
-
 int removeFPSimbolosTab(TabelaSimbT *tab, SimboloT *pai) {
   SimboloT *simbolo;
   int nivel_lexico;

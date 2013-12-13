@@ -34,4 +34,32 @@ int empilhaTipoT(PilhaT *pilha, TipoT novo_tipo) {
   return 0;
 }
 
-int confereTipo(OperacaoT op, TipoT tipo_esperado, TipoT tipo_obtido);
+int confereTipo(PilhaT *pilha, OperacaoT op, TipoT tipo_esperado) {
+  TipoT tipo_esquerda, tipo_direita;
+  
+  int i;
+  if (pilha == NULL ) {
+    trataErro(ERRO_PILHA_N_EXISTE, "");
+  }
+  else {
+    tipo_direita= *(TipoT *)desempilha(pilha);
+    tipo_esquerda= *(TipoT *)desempilha(pilha);
+    switch (op) {
+      case OP_CALCULO:
+        empilhaTipoT(pilha, tipo_direita);
+        break;
+      case OP_COMPARACAO:
+        empilhaTipoT(pilha, T_BOOLEAN);
+        break;
+      case OP_ATRIBUICAO:
+        empilhaTipoT(pilha, tipo_esquerda);
+        break;
+      }
+    if ((tipo_esquerda == tipo_direita) && (tipo_direita))
+      return 1;
+    else
+      trataErro(ERRO_TIPO, "");
+      return 0;
+  } 
+  return 0;
+}

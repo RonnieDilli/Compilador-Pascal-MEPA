@@ -57,8 +57,6 @@ SimboloT *insereSimboloTab(TabelaSimbT *, char *, CategoriaT, int);
 
 int removeSimboloTab(TabelaSimbT *, SimboloT *);
 
-int removeSimbolosTab(TabelaSimbT *, char *, int);
-
 int removeFPSimbolosTab(TabelaSimbT *, SimboloT *);
 
 int atribuiTipoSimbTab(TabelaSimbT *, TipoT, char *);

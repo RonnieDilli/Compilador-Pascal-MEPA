@@ -207,7 +207,7 @@ atrib_proc  : IDENT         { simb_aux = procuraSimboloTab(tab, token, nivel_lex
               exec_ou_atrib /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
 ;
 
-exec_ou_atrib: ATRIBUICAO expressao { geraCodigoARMZI(simb_aux); }  /* #TODO Comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
+exec_ou_atrib: ATRIBUICAO expressao { confereTipo(&pilha_tipos, OP_ATRIBUICAO, T_INTEGER); geraCodigoARMZI(simb_aux); }  /* #TODO Comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
             | exec_proc             { geraCodigoArgs (NULL, "CHPR %s, %d", simb_aux->rotulo, nivel_lexico); }    /* #TODO Tratar parametros do procedimento: p; p(); p(var1, var2); . */
 ;
 exec_proc   : ABRE_PARENTESES { chamada_de_proc = true; indice_param=0; } lista_de_parametros FECHA_PARENTESES { chamada_de_proc = false; } /* #TODO Verificar se nao eh funcao!! */
@@ -245,15 +245,15 @@ expressao   : expr_simples { chamada_de_proc = false; } relacao          /* #TOD
             | expr_simples
 ;
 
-expr_simples: expr_simples SOMA { chamada_de_proc = false; } termo       { geraCodigo (NULL, "SOMA"); }
-            | expr_simples SUBTRACAO { chamada_de_proc = false; } termo  { geraCodigo (NULL, "SUBT"); }
-            | expr_simples OR { chamada_de_proc = false; } termo         { geraCodigo (NULL, "DISJ"); }
+expr_simples: expr_simples SOMA { chamada_de_proc = false; } termo       { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "SOMA"); }
+            | expr_simples SUBTRACAO { chamada_de_proc = false; } termo  { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "SUBT"); }
+            | expr_simples OR { chamada_de_proc = false; } termo         { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "DISJ"); }
             | termo
 ;
 
-termo       : fator MULTIPLICACAO { chamada_de_proc = false; } fator { geraCodigo (NULL, "MULT"); }
-            | fator DIVISAO { chamada_de_proc = false; } fator       { geraCodigo (NULL, "DIVI"); }
-            | fator AND { chamada_de_proc = false; } fator           { geraCodigo (NULL, "CONJ"); }
+termo       : fator MULTIPLICACAO { chamada_de_proc = false; } fator { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "MULT"); }
+            | fator DIVISAO { chamada_de_proc = false; } fator       { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "DIVI"); }
+            | fator AND { chamada_de_proc = false; } fator           { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "CONJ"); }
             | fator
 ;
 
@@ -272,11 +272,11 @@ id_ou_func  : IDENT   { simb = procuraSimboloTab(tab, token, nivel_lexico);
 //             | expressao
 ;
 
-relacao     : MAIOR_QUE expr_simples  { geraCodigo (NULL, "CMMA"); }    /* #TODO Conferir regra (e verificar tipos) */
-            | MENOR_QUE expr_simples  { geraCodigo (NULL, "CMME"); }
-            | MAIOR_OU_IGUAL expr_simples  { geraCodigo (NULL, "CMAG"); }
-            | MENOR_OU_IGUAL expr_simples  { geraCodigo (NULL, "CMEG"); }
-            | IGUAL expr_simples  { geraCodigo (NULL, "CMIG"); }
+relacao     : MAIOR_QUE expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMMA"); }    /* #TODO Conferir regra (e verificar tipos) */
+            | MENOR_QUE expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMME"); }
+            | MAIOR_OU_IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMAG"); }
+            | MENOR_OU_IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMEG"); }
+            | IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMIG"); }
 ;
 
 %%
@@ -334,9 +334,9 @@ int main (int argc, char** argv) {
   // removeSimbolosTab(tab, "f1", 1);
 
   // imprimeTabSimbolos(tab); // #DEBUG
+  printf("[Teste] teste = %d\n", teste); //#DEBUG
+  desempilhaEImprime(&pilha_simbs);
 #endif
-    desempilhaEImprime(&pilha_simbs);
-    printf("[Teste] teste = %d\n", teste); //#DEBUG
 
   return 0;
 }

@@ -9,13 +9,3 @@ R00: NADA
      CRVL 0, 0
      CRVL 0, 1
      CMMA
-     ARMZ 0, 0
-     CRVL 0, 0
-     CRCT 1
-     SOMA
-     DSVF R02
-     CRCT 1
-     ARMZ 0, 0
-R02: NADA 
-     DMEM 2
-     PARA
