@@ -61,6 +61,8 @@ SimboloT *insereSimboloTab(TabelaSimbT *tab, char *id, CategoriaT categoria, int
       simbolo->nivel_lexico = nivel_lexico;
 
       tab->num_simbolos++;
+      
+      simbolo->lista_param = malloc (sizeof (ParametroT) * TAM_LISTA_PARAM);
 
       if (tab->num_simbolos == 1) {
         tab->primeiro = simbolo;
@@ -238,9 +240,6 @@ int insereParamLista(SimboloT  *simb, TipoT tipo, PassagemT passagem, int n_para
       exit(5);
     }
     else {
-      // if (simb->num_parametros - n_params == 0)
-      //   simb->lista_param = malloc (sizeof (ParametroT[TAM_LISTA_PARAM]));
-
       if (simb->lista_param == NULL ) {
         fprintf(stderr, "ERRO: *** A Lista Parametros nao foi alocada!\n");
         exit(2);

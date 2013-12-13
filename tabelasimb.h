@@ -35,7 +35,7 @@ typedef struct SimboloT {
     struct {
       int num_parametros;
       char *rotulo;
-      ParametroT lista_param[TAM_LISTA_PARAM];
+      ParametroT *lista_param;
     };
   };
   struct SimboloT *ant, *prox;
