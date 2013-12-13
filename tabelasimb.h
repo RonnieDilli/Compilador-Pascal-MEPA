@@ -5,7 +5,7 @@ typedef enum CategoriaT {
 } CategoriaT;
 
 typedef enum TipoT {
-  T_BOOLEAN, T_CHAR, T_INTEGER, T_REAL, T_VOID, T_PROCEDURE, T_FUNCTION, T_UNKNOWN=999, T_UNSET=42
+  T_BOOLEAN=42, T_CHAR, T_INTEGER, T_REAL, T_VOID, T_PROCEDURE, T_FUNCTION, T_UNKNOWN=999, T_UNSET=0
 } TipoT;
 
 /*  Estrutura de dados da Lista de Parametros usado por Funcoes e Procedimentos  */

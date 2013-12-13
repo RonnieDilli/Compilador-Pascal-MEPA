@@ -76,7 +76,8 @@ TipoT tipo_aux;
 %token NUMERO SOMA SUBTRACAO MULTIPLICACAO DIVISAO
 %token OR AND MAIOR_QUE MENOR_QUE MAIOR_OU_IGUAL MENOR_OU_IGUAL IGUAL
 %token IF THEN ELSE WHILE DO GOTO READ WRITE LABEL
-%token PROCEDURE FUNCTION INTEGER BOOLEAN
+%token PROCEDURE FUNCTION INTEGER
+%token BOOLEAN TRUE FALSE
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -121,7 +122,7 @@ declara_var : lista_id_var DOIS_PONTOS tipo { geraCodigoArgs (NULL, "AMEM %d", n
 
 tipo        : INTEGER { tipo_aux = atribuiTiposTab(tab, T_INTEGER); }
             | BOOLEAN { tipo_aux = atribuiTiposTab(tab, T_BOOLEAN); }
-            | IDENT   { tipo_aux = atribuiTiposTab(tab, T_UNKNOWN); } /* Tipo Desconhecido(ou nao tratado). #Sugestao: Adicionar Tipos Basicos: integer, boolean, char, real  (and maybe string)  */
+            | IDENT   { tipo_aux = atribuiTiposTab(tab, T_UNKNOWN); } /* Tipo Desconhecido(ou nao tratado). #Sugestao: Adicionar Tipos Basicos: char, real  (and maybe string)  */
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT  { num_vars++; simb = insereSimboloTab(tab, token, VS, nivel_lexico); simb->deslocamento = deslocamento++; } /* insere ultima var na tabela de simbolos */
@@ -203,7 +204,8 @@ lista_param_impr: lista_param_impr VIRGULA IDENT  { geraCodigoIMPR(); }
             | IDENT                               { geraCodigoIMPR(); }  /* #TODO Verificar se 'simb' eh de tipo compativel com atribuicao e passado por referencia */
 ;
 
-atrib_proc  : IDENT         { simb_aux = procuraSimboloTab(tab, token, nivel_lexico); empilhaTipoT(&pilha_tipos, simb_aux->tipo); proc_atual=simb_aux;}
+atrib_proc  : IDENT         { simb_aux = procuraSimboloTab(tab, token, nivel_lexico); empilhaTipoT(&pilha_tipos, simb_aux->tipo); proc_atual=simb_aux; 
+                              debug_print("[TipoT Tests][Atribuicao] id=[%s].tipo_aux = %d\n", simb_aux->id, simb_aux->tipo);          }
               exec_ou_atrib /* #TODO Arrumar codigo: comparar tipos ao final. (pilha de identificadores?) suportar 'fn = 4;' */
 ;
 
@@ -241,30 +243,31 @@ com_repetit : WHILE       { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
                             geraCodigo (rotulo_mepa_aux, "NADA"); }
 ;
 
-expressao   : expr_simples { chamada_de_proc = false; } MAIOR_QUE expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMMA"); }
-            | expr_simples { chamada_de_proc = false; } MENOR_QUE expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMME"); }
-            | expr_simples { chamada_de_proc = false; } MAIOR_OU_IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMAG"); }
-            | expr_simples { chamada_de_proc = false; } MENOR_OU_IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMEG"); }
-            | expr_simples { chamada_de_proc = false; } IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMIG"); }
+expressao   : expr_simples { chamada_de_proc = false; } MAIOR_QUE expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_BOOLEAN); geraCodigo (NULL, "CMMA"); }
+            | expr_simples { chamada_de_proc = false; } MENOR_QUE expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_BOOLEAN); geraCodigo (NULL, "CMME"); }
+            | expr_simples { chamada_de_proc = false; } MAIOR_OU_IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_BOOLEAN); geraCodigo (NULL, "CMAG"); }
+            | expr_simples { chamada_de_proc = false; } MENOR_OU_IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_BOOLEAN); geraCodigo (NULL, "CMEG"); }
+            | expr_simples { chamada_de_proc = false; } IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_BOOLEAN); geraCodigo (NULL, "CMIG"); }
             | expr_simples
 ;
 
 expr_simples: expr_simples SOMA { chamada_de_proc = false; } termo       { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "SOMA"); }
             | expr_simples SUBTRACAO { chamada_de_proc = false; } termo  { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "SUBT"); }
-            | expr_simples OR { chamada_de_proc = false; } termo         { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "DISJ"); }
+            | expr_simples OR { chamada_de_proc = false; } termo         { confereTipo(&pilha_tipos, OP_COMPARACAO, T_BOOLEAN); geraCodigo (NULL, "DISJ"); }
             | termo
 ;
 
 termo       : fator MULTIPLICACAO { chamada_de_proc = false; } fator { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "MULT"); }
             | fator DIVISAO { chamada_de_proc = false; } fator       { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "DIVI"); }
-            | fator AND { chamada_de_proc = false; } fator           { confereTipo(&pilha_tipos, OP_CALCULO, T_INTEGER); geraCodigo (NULL, "CONJ"); }
+            | fator AND { chamada_de_proc = false; } fator           { confereTipo(&pilha_tipos, OP_COMPARACAO, T_BOOLEAN); geraCodigo (NULL, "CONJ"); }
             | fator
 ;
 
 fator       : ABRE_PARENTESES expressao FECHA_PARENTESES                /* #TODO Adicionar f(n); */
             | id_ou_func
-            | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token));
-                        empilhaTipoT(&pilha_tipos, T_INTEGER); }
+            | NUMERO  { geraCodigoArgs (NULL, "CRCT %d", atoi(token)); empilhaTipoT(&pilha_tipos, T_INTEGER); }
+            | TRUE    { geraCodigo (NULL, "CRCT 1"); empilhaTipoT(&pilha_tipos, T_BOOLEAN); }
+            | FALSE   { geraCodigo (NULL, "CRCT 0"); empilhaTipoT(&pilha_tipos, T_BOOLEAN); }
 ;
 
 id_ou_func  : IDENT   { simb = procuraSimboloTab(tab, token, nivel_lexico);

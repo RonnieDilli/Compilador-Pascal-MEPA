@@ -55,7 +55,8 @@ int confereTipo(PilhaT *pilha, OperacaoT op, TipoT tipo_esperado) {
         empilhaTipoT(pilha, tipo_esquerda);
         break;
       }
-    if ((tipo_esquerda == tipo_direita) && (tipo_direita))
+      debug_print("[TipoT Tests] tipo_esquerda= %d - tipo_direita= %d\n", tipo_esquerda, tipo_direita);
+    if (tipo_esquerda == tipo_direita)
       return 1;
     else
       trataErro(ERRO_TIPO, "");

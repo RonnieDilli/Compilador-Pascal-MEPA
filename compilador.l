@@ -242,6 +242,18 @@ boolean { simbolo = simb_boolean;
   return BOOLEAN;
 }
 
+true { simbolo = simb_true;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME(" true");
+  return TRUE;
+}
+
+false { simbolo = simb_false;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME(" false");
+  return FALSE;
+}
+
 {numero} { simbolo = simb_numero;
   strncpy (token, yytext, TAM_TOKEN);
   IMPRIME(" numero");

@@ -199,10 +199,11 @@ int insereParamLista(SimboloT  *simb, TipoT tipo, PassagemT passagem, int n_para
         trataErro(ERRO_LISTA_PARAM_NAO_ALOC, "");
       }
       else {
-        for (i=0; i < n_params; i++) {
+        for (i=0; i < n_params; i++) { // #TODO inverter a ordem?
           debug_print("[for] simb->id = %s, passagem = %d, soma = %d\n", simb->id, passagem, (simb->num_parametros - n_params + i));
-          // simb->lista_param[simb->num_parametros - n_params + i].tipo = tipo;
-          simb->lista_param[simb->num_parametros - n_params + i].passagem = passagem; // #TODO inverter
+          simb->lista_param[simb->num_parametros - n_params + i].tipo = tipo;
+          simb->lista_param[simb->num_parametros - n_params + i].passagem = passagem;
+          // simb->prox->tipo = tipo;
         }
       }
     }
