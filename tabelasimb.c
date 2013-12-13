@@ -115,7 +115,7 @@ int removeSimbolosTab(TabelaSimbT *tab, char *id, int nivel_lexico) {
     else {
       num_var_simples = 0;
       while ( (simbolo=simbolo->prox) != NULL) {
-        if (( simbolo->nivel_lexico == nivel_lexico) && ( simbolo->categoria == VS )) {
+        if (( simbolo->nivel_lexico == nivel_lexico) && (simbolo->categoria == VS || simbolo->categoria == PF) ) {
           num_var_simples++;
           removeSimboloTab(tab, simbolo);
         }
@@ -160,7 +160,7 @@ int atribuiTiposTab(TabelaSimbT *tab, TipoT tipo) {
     i=0;
     simbolo = tab->ultimo;
     while (simbolo->tipo == T_UNSET) {
-      if (simbolo->categoria == VS) {
+      if (simbolo->categoria == VS || simbolo->categoria == PF) {
         simbolo->tipo = tipo;
         debug_print("[for] tipo = %d\n", tipo);
         i++;

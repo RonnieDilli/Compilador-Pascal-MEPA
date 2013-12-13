@@ -155,9 +155,9 @@ lista_dec_param : lista_dec_param PONTO_E_VIRGULA
 parametros_dec: VAR lista_id_par DOIS_PONTOS tipo { atrubuiPassagemTab(tab, T_REFERENCIA, num_vars); insereParamLista(simb, tipo_aux, T_REFERENCIA, num_vars); debug_print("[Parametro por referencia] simb->id = %d, num_vars = %d\n", simb->id, num_vars);  } /* #TODO Adicionar parametros na lista de parametros da funcao/proc. */
             | lista_id_par DOIS_PONTOS tipo       { atrubuiPassagemTab(tab, T_VALOR, num_vars); insereParamLista(simb, tipo_aux, T_VALOR, num_vars); debug_print("[Parametro por valor] simb->id = %d, num_vars = %d\n", simb->id, num_vars); }
 ;
-lista_id_par: lista_id_par VIRGULA IDENT  { simb->num_parametros++; num_vars++; simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico);
+lista_id_par: lista_id_par VIRGULA IDENT  { simb->num_parametros++; num_vars++; simb_aux = insereSimboloTab(tab, token, PF, nivel_lexico);
                                             debug_print("[insere param-last] simb->num_parametros = %d\n", simb->num_parametros); } /* insere ultimo Parametro na tabela de simbolos */
-            | IDENT                       { simb->num_parametros++; num_vars++; simb_aux = insereSimboloTab(tab, token, VS, nivel_lexico);
+            | IDENT                       { simb->num_parametros++; num_vars++; simb_aux = insereSimboloTab(tab, token, PF, nivel_lexico);
                                             debug_print("[insere param] simb->num_parametros = %d\n", simb->num_parametros); } /* insere Parametros na tabela de simbolos */
 ;
 

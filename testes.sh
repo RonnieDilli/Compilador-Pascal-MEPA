@@ -55,7 +55,7 @@ if [ -x 'compilador' ]; then
         echo "Erro retornado ($f/ERRO_ESPERADO) diferente do retorno ($retorno)!"
       fi
     else
-      echo "Arquivo com ERRO esperado, mas compilado com sucesso: '$f'"
+      echo "Arquivo com ERRO esperado, mas compilado mesmo assim: '$f'"
     fi
   done
   IFS=$SAVEIFS
