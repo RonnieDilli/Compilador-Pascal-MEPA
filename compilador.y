@@ -241,7 +241,11 @@ com_repetit : WHILE       { geraRotulo(&rotulo_mepa, &cont_rotulo, &pilha_rot);
                             geraCodigo (rotulo_mepa_aux, "NADA"); }
 ;
 
-expressao   : expr_simples { chamada_de_proc = false; } relacao          /* #TODO Conferir regra */
+expressao   : expr_simples { chamada_de_proc = false; } MAIOR_QUE expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMMA"); }
+            | expr_simples { chamada_de_proc = false; } MENOR_QUE expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMME"); }
+            | expr_simples { chamada_de_proc = false; } MAIOR_OU_IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMAG"); }
+            | expr_simples { chamada_de_proc = false; } MENOR_OU_IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMEG"); }
+            | expr_simples { chamada_de_proc = false; } IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMIG"); }
             | expr_simples
 ;
 
@@ -272,12 +276,6 @@ id_ou_func  : IDENT   { simb = procuraSimboloTab(tab, token, nivel_lexico);
 //             | expressao
 ;
 
-relacao     : MAIOR_QUE expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMMA"); }    /* #TODO Conferir regra (e verificar tipos) */
-            | MENOR_QUE expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMME"); }
-            | MAIOR_OU_IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMAG"); }
-            | MENOR_OU_IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMEG"); }
-            | IGUAL expr_simples  { confereTipo(&pilha_tipos, OP_COMPARACAO, T_INTEGER); geraCodigo (NULL, "CMIG"); }
-;
 
 %%
 
