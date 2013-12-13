@@ -26,4 +26,4 @@ $(PROG).o : $(PROG).h $(PROG)F.c
 	$(CC) -c $(PROG)F.c -o $@
 
 clean :
-	rm -rf $(PROG).tab.* $(LEX_C) *.o $(PROG) $(PROG).output $(PROG).dSYM
+	rm -rf $(PROG).tab.* $(LEX_C) *.o $(PROG) $(PROG).output $(PROG).dSYM core
